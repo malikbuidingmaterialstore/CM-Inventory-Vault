@@ -109,17 +109,24 @@ export interface PropertyTikTokLink {
   updated_at: string;
 }
 
+export type PropertyListingType = 'Sale' | 'Rent';
+
 export interface Property {
   property_id: string;
   user_id: string;
+  listing_type?: PropertyListingType; // 'Sale' or 'Rent'
   society: string;
   town: string;
   phase: string;
   block: string;
   plot_number: string;
   plot_size: string;
+  marla_count?: number; // Total marlas (e.g. 5, 10, 20)
+  price_per_marla?: number; // Rate per marla in PKR
+  pricing_mode?: 'total' | 'per_marla'; // Whether user entered total or per-marla
+  rent_duration?: 'Monthly' | 'Yearly'; // Rent payment cycle
   plot_type: PlotType;
-  price: number; // Asking price in PKR
+  price: number; // Total Asking price or Monthly Rent in PKR
   asking_price?: number;
   min_price?: number;
   max_price?: number;

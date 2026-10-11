@@ -273,7 +273,7 @@ export const MyPropertiesView: React.FC<MyPropertiesViewProps> = ({
                 onClick={() => setFilterStatus('All')}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition border ${
                   filterStatus === 'All'
-                    ? 'bg-sky-600 dark:bg-sky-500 text-white border-sky-600 shadow-xs'
+                    ? 'bg-amber-600 text-white border-amber-600 shadow-xs'
                     : 'theme-bg-subtle theme-text-secondary theme-border hover:theme-text-main'
                 }`}
               >
@@ -661,8 +661,15 @@ export const MyPropertiesView: React.FC<MyPropertiesViewProps> = ({
                     )}
                   </div>
 
-                  {/* Plot Size & Type */}
-                  <div className="absolute bottom-2.5 left-2.5 flex items-center gap-1.5">
+                  {/* Plot Size, Type & Rent/Sale Badge */}
+                  <div className="absolute bottom-2.5 left-2.5 flex items-center gap-1.5 flex-wrap">
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded shadow-xs ${
+                      prop.listing_type === 'Rent'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-amber-600 text-white'
+                    }`}>
+                      {prop.listing_type === 'Rent' ? 'RENT' : 'SALE'}
+                    </span>
                     <span className="bg-black/75 backdrop-blur-md text-white text-[11px] font-bold px-2 py-0.5 rounded">
                       {prop.plot_size}
                     </span>
@@ -675,12 +682,12 @@ export const MyPropertiesView: React.FC<MyPropertiesViewProps> = ({
                 {/* Card Details */}
                 <div className="p-4 flex-1 flex flex-col justify-between">
                   <div>
-                    <div className="flex items-center gap-1 text-xs text-sky-800 dark:text-sky-300 font-semibold">
+                    <div className="flex items-center gap-1 text-xs text-amber-800 dark:text-amber-300 font-semibold">
                       <MapPin className="w-3.5 h-3.5 shrink-0" />
                       <span className="truncate">{prop.society}</span>
                     </div>
 
-                    <h2 className="text-base font-bold theme-text-main mt-1 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
+                    <h2 className="text-base font-bold theme-text-main mt-1 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
                       Plot #{prop.plot_number} · {prop.block || prop.phase || 'Main'}
                     </h2>
 
@@ -691,11 +698,18 @@ export const MyPropertiesView: React.FC<MyPropertiesViewProps> = ({
 
                   <div className="mt-3.5 pt-3 border-t theme-border flex items-center justify-between gap-2">
                     <div>
-                      <div className="text-base sm:text-lg font-bold theme-text-main font-brand">
-                        {priceInfo.short}
+                      <div className="text-base sm:text-lg font-bold theme-text-main font-brand flex items-baseline gap-1">
+                        <span>{priceInfo.short}</span>
+                        {prop.listing_type === 'Rent' && (
+                          <span className="text-[10px] text-blue-600 dark:text-blue-400 font-semibold">
+                            /{prop.rent_duration === 'Yearly' ? 'yr' : 'mo'}
+                          </span>
+                        )}
                       </div>
                       <div className="text-[10px] theme-text-tertiary font-mono">
-                        {priceInfo.full}
+                        {prop.price_per_marla && prop.listing_type !== 'Rent' 
+                          ? `PKR ${formatPKR(prop.price_per_marla).short} / Marla`
+                          : priceInfo.full}
                       </div>
                     </div>
 

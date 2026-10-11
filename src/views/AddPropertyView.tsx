@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Property, PropertyImage, PropertyTikTokLink, PlotType, PropertyStatus, User } from '../types';
+import { Property, PropertyImage, PropertyTikTokLink, PlotType, PropertyStatus, PropertyListingType, User } from '../types';
 import { 
   Building2, 
   MapPin, 
@@ -15,7 +15,9 @@ import {
   Camera,
   Layers,
   FileText,
-  Sparkles
+  Sparkles,
+  Calculator,
+  Key
 } from 'lucide-react';
 import { formatPKR } from '../utils/formatters';
 
@@ -113,6 +115,20 @@ const findDuplicateProperty = (
   });
 };
 
+// Helper: extract numeric marla from size string
+const parseMarlaFromSize = (sizeStr: string): number => {
+  const lower = sizeStr.toLowerCase().trim();
+  if (lower.includes('kanal')) {
+    const kanalMatch = lower.match(/([\d.]+)\s*kanal/);
+    if (kanalMatch) return parseFloat(kanalMatch[1]) * 20;
+    return 20;
+  }
+  const marlaMatch = lower.match(/([\d.]+)\s*marla/);
+  if (marlaMatch) return parseFloat(marlaMatch[1]);
+  const numOnly = parseFloat(sizeStr);
+  return isNaN(numOnly) ? 5 : numOnly;
+};
+
 export const AddPropertyView: React.FC<AddPropertyViewProps> = ({
   user,
   editingProperty,
@@ -122,6 +138,11 @@ export const AddPropertyView: React.FC<AddPropertyViewProps> = ({
   onViewExisting,
   isOnline,
 }) => {
+  // Purpose: Sale vs Rent
+  const [listingType, setListingType] = useState<PropertyListingType>(editingProperty?.listing_type || 'Sale');
+  const [rentDuration, setRentDuration] = useState<'Monthly' | 'Yearly'>(editingProperty?.rent_duration || 'Monthly');
+
+  // Location & Identity
   const [society, setSociety] = useState(editingProperty?.society || '');
   const [town, setTown] = useState(editingProperty?.town || 'Lahore');
   const [phase, setPhase] = useState(editingProperty?.phase || '');
@@ -129,6 +150,15 @@ export const AddPropertyView: React.FC<AddPropertyViewProps> = ({
   const [plotNumber, setPlotNumber] = useState(editingProperty?.plot_number || '');
   const [plotSize, setPlotSize] = useState(editingProperty?.plot_size || '5 Marla');
   const [plotType, setPlotType] = useState<PlotType>(editingProperty?.plot_type || 'Residential');
+
+  // Pricing Mode: 'total' or 'per_marla'
+  const [pricingMode, setPricingMode] = useState<'total' | 'per_marla'>(editingProperty?.pricing_mode || 'total');
+  const [marlaCount, setMarlaCount] = useState<string>(
+    editingProperty?.marla_count ? String(editingProperty.marla_count) : String(parseMarlaFromSize(editingProperty?.plot_size || '5 Marla'))
+  );
+  const [pricePerMarla, setPricePerMarla] = useState<string>(
+    editingProperty?.price_per_marla ? String(editingProperty.price_per_marla) : ''
+  );
   const [price, setPrice] = useState<string>(editingProperty?.price ? String(editingProperty.price) : '');
   const [status, setStatus] = useState<PropertyStatus>(editingProperty?.status || 'Available');
   const [notes, setNotes] = useState(editingProperty?.notes || '');
@@ -145,6 +175,51 @@ export const AddPropertyView: React.FC<AddPropertyViewProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+
+  // Update marla count automatically if plotSize changes
+  const handleSelectPlotSize = (sz: string) => {
+    setPlotSize(sz);
+    const parsed = parseMarlaFromSize(sz);
+    if (parsed > 0) {
+      setMarlaCount(String(parsed));
+      if (pricingMode === 'per_marla' && pricePerMarla) {
+        const total = Math.round(parsed * Number(pricePerMarla));
+        setPrice(String(total));
+      }
+    }
+  };
+
+  // When in per_marla mode, recalculate total price
+  const handlePricePerMarlaChange = (rateStr: string) => {
+    setPricePerMarla(rateStr);
+    const m = parseFloat(marlaCount) || 0;
+    const rate = parseFloat(rateStr) || 0;
+    if (m > 0 && rate > 0) {
+      const calculated = Math.round(m * rate);
+      setPrice(String(calculated));
+    }
+  };
+
+  // When in per_marla mode, recalculate if marla count changes
+  const handleMarlaCountChange = (mStr: string) => {
+    setMarlaCount(mStr);
+    const m = parseFloat(mStr) || 0;
+    const rate = parseFloat(pricePerMarla) || 0;
+    if (m > 0 && rate > 0) {
+      const calculated = Math.round(m * rate);
+      setPrice(String(calculated));
+    }
+  };
+
+  // If in total mode and price changes, derive per marla rate
+  const handleTotalPriceChange = (totalStr: string) => {
+    setPrice(totalStr);
+    const m = parseFloat(marlaCount) || parseMarlaFromSize(plotSize) || 0;
+    const total = parseFloat(totalStr) || 0;
+    if (m > 0 && total > 0) {
+      setPricePerMarla(String(Math.round(total / m)));
+    }
+  };
 
   // Live conversion for Price
   const numericPrice = Number(price) || 0;
@@ -268,6 +343,11 @@ export const AddPropertyView: React.FC<AddPropertyViewProps> = ({
       const propertyRecord: Property = {
         property_id: propId,
         user_id: user.user_id,
+        listing_type: listingType,
+        rent_duration: listingType === 'Rent' ? rentDuration : undefined,
+        pricing_mode: pricingMode,
+        marla_count: parseFloat(marlaCount) || parseMarlaFromSize(plotSize) || undefined,
+        price_per_marla: parseFloat(pricePerMarla) || undefined,
         society: society.trim(),
         town: town.trim() || 'Lahore',
         phase: phase.trim(),
@@ -392,13 +472,71 @@ export const AddPropertyView: React.FC<AddPropertyViewProps> = ({
         {/* Section 1: Basic Information */}
         <div className="theme-bg-card border theme-border rounded-2xl p-4 sm:p-6 theme-shadow">
           <div className="flex items-center gap-2 mb-4 pb-3 border-b theme-border">
-            <Building2 className="w-4 h-4 text-sky-700 dark:text-sky-400" />
+            <Building2 className="w-4 h-4 text-amber-700 dark:text-amber-400" />
             <h2 className="text-sm font-bold theme-text-main uppercase tracking-wider font-brand">
               Basic Housing Information
             </h2>
           </div>
 
           <div className="space-y-4">
+            {/* Purpose: For Sale vs For Rent Toggle */}
+            <div className="p-3.5 rounded-2xl theme-bg-subtle border theme-border">
+              <label className="block text-xs font-bold theme-text-main mb-2 flex items-center justify-between">
+                <span>Property Purpose (فروخت یا کرایہ)</span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/15 text-amber-800 dark:text-amber-300 font-bold">
+                  {listingType === 'Rent' ? 'FOR RENT' : 'FOR SALE'}
+                </span>
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setListingType('Sale')}
+                  className={`py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 border ${
+                    listingType === 'Sale'
+                      ? 'bg-amber-600 text-white border-amber-600 shadow-md shadow-amber-600/20'
+                      : 'theme-bg-card theme-text-secondary theme-border hover:theme-text-main'
+                  }`}
+                >
+                  <DollarSign className="w-4 h-4" />
+                  <span>For Sale (فروخت کے لیے)</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setListingType('Rent')}
+                  className={`py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 border ${
+                    listingType === 'Rent'
+                      ? 'bg-amber-600 text-white border-amber-600 shadow-md shadow-amber-600/20'
+                      : 'theme-bg-card theme-text-secondary theme-border hover:theme-text-main'
+                  }`}
+                >
+                  <Key className="w-4 h-4" />
+                  <span>For Rent (کرایہ کے لیے)</span>
+                </button>
+              </div>
+
+              {listingType === 'Rent' && (
+                <div className="mt-3 pt-3 border-t theme-border flex items-center justify-between gap-3 animate-in fade-in">
+                  <span className="text-xs theme-text-secondary font-medium">Rent Payment Cycle:</span>
+                  <div className="flex items-center gap-1.5">
+                    {(['Monthly', 'Yearly'] as const).map((cycle) => (
+                      <button
+                        key={cycle}
+                        type="button"
+                        onClick={() => setRentDuration(cycle)}
+                        className={`text-xs px-3 py-1 rounded-lg font-semibold transition border ${
+                          rentDuration === cycle
+                            ? 'bg-amber-500/20 text-amber-800 dark:text-amber-300 border-amber-500/50'
+                            : 'theme-bg-card theme-text-tertiary theme-border hover:theme-text-main'
+                        }`}
+                      >
+                        {cycle}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
             {/* Society with Quick Suggestions */}
             <div>
               <label className="block text-xs font-semibold theme-text-secondary mb-1.5">
@@ -538,10 +676,10 @@ export const AddPropertyView: React.FC<AddPropertyViewProps> = ({
                     <button
                       key={sz}
                       type="button"
-                      onClick={() => setPlotSize(sz)}
+                      onClick={() => handleSelectPlotSize(sz)}
                       className={`text-[9px] px-1.5 py-0.5 rounded transition ${
                         plotSize === sz
-                          ? 'bg-sky-600 text-white font-bold'
+                          ? 'bg-amber-600 text-white font-bold shadow-xs'
                           : 'theme-bg-subtle theme-text-secondary border theme-border hover:theme-text-main'
                       }`}
                     >
@@ -581,28 +719,143 @@ export const AddPropertyView: React.FC<AddPropertyViewProps> = ({
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Price / Rate with Live Lac/Crore preview */}
-            <div>
-              <label className="block text-xs font-semibold theme-text-secondary mb-1.5">
-                Price / Rate (in PKR) <span className="text-amber-600 dark:text-amber-400">*</span>
-              </label>
-              <input
-                type="number"
-                min="0"
-                step="1000"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                placeholder="e.g. 4800000"
-                required
-                className="w-full px-3.5 py-2.5 theme-bg-subtle border theme-border rounded-xl theme-text-main placeholder:text-stone-400 text-sm focus:outline-none focus:border-amber-500 transition"
-              />
+            {/* Pricing Section with Total vs Per-Marla Rate Mode */}
+            <div className="space-y-3">
+              {/* Pricing Mode Toggle (only for Sale or plots) */}
+              <div className="flex items-center justify-between pb-1">
+                <label className="text-xs font-semibold theme-text-secondary">
+                  {listingType === 'Rent' 
+                    ? `Rent Amount (${rentDuration})` 
+                    : 'Pricing Method (ریٹ کا طریقہ)'} <span className="text-amber-600 dark:text-amber-400">*</span>
+                </label>
+
+                {listingType === 'Sale' && (
+                  <div className="flex items-center p-0.5 rounded-lg theme-bg-subtle border theme-border text-[11px]">
+                    <button
+                      type="button"
+                      onClick={() => setPricingMode('total')}
+                      className={`px-2.5 py-1 rounded-md font-bold transition ${
+                        pricingMode === 'total'
+                          ? 'bg-amber-600 text-white shadow-xs'
+                          : 'theme-text-secondary hover:theme-text-main'
+                      }`}
+                    >
+                      Total Price (مکمل رقم)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPricingMode('per_marla')}
+                      className={`px-2.5 py-1 rounded-md font-bold transition flex items-center gap-1 ${
+                        pricingMode === 'per_marla'
+                          ? 'bg-amber-600 text-white shadow-xs'
+                          : 'theme-text-secondary hover:theme-text-main'
+                      }`}
+                    >
+                      <Calculator className="w-3 h-3" />
+                      <span>Per Marla (فی مرلہ)</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Per Marla Calculation Inputs */}
+              {pricingMode === 'per_marla' && listingType === 'Sale' ? (
+                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-3 animate-in fade-in">
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <div>
+                      <label className="block text-[11px] font-semibold text-amber-900 dark:text-amber-200 mb-1">
+                        Total Marla (کل مرلے)
+                      </label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        min="0.1"
+                        value={marlaCount}
+                        onChange={(e) => handleMarlaCountChange(e.target.value)}
+                        placeholder="e.g. 5"
+                        className="w-full px-3 py-2 rounded-lg theme-bg-card border theme-border text-xs theme-text-main focus:outline-none focus:border-amber-500 font-mono font-bold"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-semibold text-amber-900 dark:text-amber-200 mb-1">
+                        Rate Per Marla (فی مرلہ ریٹ)
+                      </label>
+                      <input
+                        type="number"
+                        step="1000"
+                        min="1000"
+                        value={pricePerMarla}
+                        onChange={(e) => handlePricePerMarlaChange(e.target.value)}
+                        placeholder="e.g. 1000000"
+                        required
+                        className="w-full px-3 py-2 rounded-lg theme-bg-card border theme-border text-xs theme-text-main focus:outline-none focus:border-amber-500 font-mono font-bold"
+                      />
+                    </div>
+                  </div>
+
+                  {pricePerMarla && Number(pricePerMarla) > 0 && (
+                    <div className="text-[11px] text-amber-800 dark:text-amber-300 font-mono flex items-center justify-between pt-1 border-t border-amber-500/20">
+                      <span>Per Marla: PKR {formatPKR(Number(pricePerMarla)).short}</span>
+                      <span className="font-bold">Total: {marlaCount} Marla × {formatPKR(Number(pricePerMarla)).short}</span>
+                    </div>
+                  )}
+
+                  {/* Calculated Total Display */}
+                  <div>
+                    <label className="block text-[11px] font-semibold text-amber-900 dark:text-amber-200 mb-1">
+                      Calculated Total Price (خودکار کل قیمت):
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={price}
+                      onChange={(e) => setPrice(e.target.value)}
+                      placeholder="Calculated Total"
+                      required
+                      className="w-full px-3.5 py-2.5 theme-bg-card border-2 border-amber-500/60 rounded-xl theme-text-main text-sm font-bold font-mono focus:outline-none"
+                    />
+                  </div>
+                </div>
+              ) : (
+                /* Standard Total Price Input */
+                <div>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      min="0"
+                      step="1000"
+                      value={price}
+                      onChange={(e) => handleTotalPriceChange(e.target.value)}
+                      placeholder={listingType === 'Rent' ? 'e.g. 45000 (Monthly Rent)' : 'e.g. 5000000 (Total Price)'}
+                      required
+                      className="w-full px-3.5 py-2.5 theme-bg-subtle border theme-border rounded-xl theme-text-main placeholder:text-stone-400 text-sm focus:outline-none focus:border-amber-500 transition font-mono font-semibold"
+                    />
+                  </div>
+
+                  {/* Optional Per Marla breakdown in total mode */}
+                  {listingType === 'Sale' && numericPrice > 0 && (
+                    <div className="mt-1 text-[11px] theme-text-tertiary flex items-center justify-between">
+                      <span>Rate breakdown:</span>
+                      <span className="font-mono text-amber-700 dark:text-amber-400 font-semibold">
+                        ~PKR {formatPKR(Math.round(numericPrice / (parseFloat(marlaCount) || parseMarlaFromSize(plotSize) || 5))).short} / Marla
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Friendly Pakistani denomination badge */}
               {numericPrice > 0 && (
-                <div className="mt-2 p-2 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 flex items-center justify-between text-xs">
-                  <span className="text-amber-800 dark:text-amber-300 font-bold font-brand text-sm">
-                    {pkrFormatted.short}
-                  </span>
+                <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 flex items-center justify-between text-xs">
+                  <div>
+                    <span className="text-amber-800 dark:text-amber-300 font-bold font-brand text-sm sm:text-base block">
+                      {pkrFormatted.short}
+                    </span>
+                    <span className="text-[10px] text-amber-700 dark:text-amber-400 font-medium">
+                      {listingType === 'Rent' ? `Rent (${rentDuration})` : 'Total Price'}
+                    </span>
+                  </div>
                   <span className="theme-text-secondary font-mono text-[11px]">
                     {pkrFormatted.full}
                   </span>

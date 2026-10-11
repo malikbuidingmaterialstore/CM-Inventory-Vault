@@ -467,6 +467,15 @@ export const PropertyDetailsView: React.FC<PropertyDetailsViewProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-2">
+              {/* For Sale vs For Rent Badge */}
+              <span className={`text-xs font-bold font-mono px-2.5 py-0.5 rounded-md shadow-xs ${
+                property.listing_type === 'Rent'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-amber-600 text-white'
+              }`}>
+                {property.listing_type === 'Rent' ? 'FOR RENT' : 'FOR SALE'}
+              </span>
+
               <span className="text-xs font-bold font-mono px-2.5 py-0.5 rounded-md bg-amber-100 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700">
                 {property.society}
               </span>
@@ -499,7 +508,9 @@ export const PropertyDetailsView: React.FC<PropertyDetailsViewProps> = ({
           {/* Price Tag */}
           <div className="sm:text-right theme-bg-subtle p-4 rounded-2xl border theme-border">
             <span className="text-[11px] uppercase tracking-wider theme-text-tertiary font-semibold block">
-              Asking Price / Rate
+              {property.listing_type === 'Rent' 
+                ? `Rent (${property.rent_duration || 'Monthly'})` 
+                : 'Asking Price / Rate'}
             </span>
             <div className="text-2xl sm:text-3xl font-extrabold text-amber-800 dark:text-amber-300 font-brand mt-0.5">
               {priceInfo.short}
@@ -507,6 +518,11 @@ export const PropertyDetailsView: React.FC<PropertyDetailsViewProps> = ({
             <div className="text-xs theme-text-secondary font-mono mt-0.5">
               {priceInfo.full}
             </div>
+            {property.price_per_marla && property.listing_type !== 'Rent' && (
+              <div className="mt-1 text-[11px] font-mono text-amber-700 dark:text-amber-400 font-semibold border-t border-amber-500/20 pt-1">
+                Rate: PKR {formatPKR(property.price_per_marla).short} / Marla
+              </div>
+            )}
           </div>
         </div>
 
