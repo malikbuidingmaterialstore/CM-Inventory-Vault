@@ -1,0 +1,224 @@
+@import "tailwindcss";
+
+@layer base {
+  :root, [data-theme="warm-paper"] {
+    --bg-app: #F8F9FA;
+    --bg-card: #FFFFFF;
+    --bg-card-hover: #FBFBFB;
+    --bg-card-subtle: #F1F3F5;
+    --bg-card-muted: #E9ECEF;
+    --border-app: #D1D5DB;
+    --border-app-subtle: #E5E7EB;
+    --text-main: #111827;
+    --text-secondary: #374151;
+    --text-tertiary: #6B7280;
+    --accent-blue: #CA8A04;
+    --accent-blue-hover: #A16207;
+    --accent-blue-bg: #FEF9C3;
+    --accent-blue-border: #FDE047;
+    --accent-gold: #D4AF37;
+    --accent-gold-hover: #B8860B;
+    --accent-gold-bg: #FEF9C3;
+    --accent-gold-border: #FACC15;
+    --accent-emerald: #059669;
+    --accent-emerald-bg: #ECFDF5;
+    --accent-emerald-border: #A7F3D0;
+    --accent-rose: #DC2626;
+    --accent-rose-bg: #FEF2F2;
+    --accent-rose-border: #FECACA;
+    --header-bg: #FFFFFF;
+    --header-border: #E5E7EB;
+    --nav-bg: #FFFFFF;
+    --nav-border: #E5E7EB;
+    --shadow-soft: 0 4px 16px -2px rgba(17, 24, 39, 0.06), 0 1px 3px -1px rgba(17, 24, 39, 0.04);
+  }
+
+  [data-theme="soothing-twilight"], .dark {
+    --bg-app: #0D0F12;
+    --bg-card: #14171D;
+    --bg-card-hover: #1A1F26;
+    --bg-card-subtle: #1F252E;
+    --bg-card-muted: #101216;
+    --border-app: #2A303C;
+    --border-app-subtle: #212630;
+    --text-main: #F9FAFB;
+    --text-secondary: #D1D5DB;
+    --text-tertiary: #9CA3AF;
+    --accent-blue: #EAB308;
+    --accent-blue-hover: #FACC15;
+    --accent-blue-bg: #2A240C;
+    --accent-blue-border: #854D0E;
+    --accent-gold: #F59E0B;
+    --accent-gold-hover: #FBBF24;
+    --accent-gold-bg: #2D2305;
+    --accent-gold-border: #B45309;
+    --accent-emerald: #10B981;
+    --accent-emerald-bg: #064E3B;
+    --accent-emerald-border: #047857;
+    --accent-rose: #F87171;
+    --accent-rose-bg: #450A0A;
+    --accent-rose-border: #991B1B;
+    --header-bg: #14171D;
+    --header-border: #2A303C;
+    --nav-bg: #14171D;
+    --nav-border: #2A303C;
+    --shadow-soft: 0 6px 28px -2px rgba(0, 0, 0, 0.7);
+  }
+
+  /* Eye Shield: Gentle optical warmth filter to protect human retina from blue light strain */
+  html.eye-shield-active {
+    filter: sepia(18%) brightness(98%) contrast(96%);
+    transition: filter 0.3s ease;
+  }
+
+  html {
+    width: 100%;
+    min-height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    width: 100%;
+    min-height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--bg-app);
+    color: var(--text-main);
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+
+  #root {
+    width: 100%;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+    overflow-y: visible;
+  }
+
+  /* Mobile Touch Optimization: prevent delay and iOS zoom on form inputs */
+  button, a, input, select, textarea {
+    touch-action: manipulation;
+  }
+
+  @media screen and (max-width: 640px) {
+    input, select, textarea {
+      font-size: 16px !important;
+    }
+  }
+}
+
+.font-brand {
+  font-family: 'Cinzel', Georgia, serif;
+}
+
+/* Eye-Care Semantic Utility Classes */
+.theme-bg-main {
+  background-color: var(--bg-app);
+}
+
+.theme-bg-card {
+  background-color: var(--bg-card);
+}
+
+.theme-bg-subtle {
+  background-color: var(--bg-card-subtle);
+}
+
+.theme-bg-muted {
+  background-color: var(--bg-card-muted);
+}
+
+.theme-border {
+  border-color: var(--border-app);
+}
+
+.theme-border-subtle {
+  border-color: var(--border-app-subtle);
+}
+
+.theme-text-main {
+  color: var(--text-main);
+}
+
+.theme-text-secondary {
+  color: var(--text-secondary);
+}
+
+.theme-text-tertiary {
+  color: var(--text-tertiary);
+}
+
+.theme-shadow {
+  box-shadow: var(--shadow-soft);
+}
+
+/* Safe area support for mobile devices with notches and gesture bars */
+.pb-safe {
+  padding-bottom: max(env(safe-area-inset-bottom, 16px), 16px);
+}
+
+.pt-safe {
+  padding-top: max(env(safe-area-inset-top, 16px), 16px);
+}
+
+/* Custom warm gold gradient text */
+.text-gold-gradient {
+  background: linear-gradient(135deg, #B46F11 0%, #D97706 40%, #92400E 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+[data-theme="soothing-twilight"] .text-gold-gradient,
+.dark .text-gold-gradient {
+  background: linear-gradient(135deg, #FDE68A 0%, #F59E0B 40%, #B45309 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Hide scrollbars while allowing smooth scroll on mobile */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Touch-friendly range input slider track and thumb */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 22px;
+  width: 22px;
+  border-radius: 50%;
+  background: #D97706;
+  border: 2px solid #FFFFFF;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  cursor: pointer;
+  margin-top: -7px;
+}
+
+[data-theme="soothing-twilight"] input[type="range"]::-webkit-slider-thumb,
+.dark input[type="range"]::-webkit-slider-thumb {
+  border-color: #17191E;
+  background: #F59E0B;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+}

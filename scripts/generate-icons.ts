@@ -1,0 +1,226 @@
+import fs from 'fs';
+import path from 'path';
+import sharp from 'sharp';
+
+const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="800" height="800">
+  <defs>
+    <!-- Rich 3D Gold Gradient -->
+    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#CA9E3C" />
+      <stop offset="25%" stop-color="#FDF3A9" />
+      <stop offset="50%" stop-color="#D4AF37" />
+      <stop offset="75%" stop-color="#9E7820" />
+      <stop offset="100%" stop-color="#E5C158" />
+    </linearGradient>
+
+    <!-- Warm Gold Gradient for Facades -->
+    <linearGradient id="goldTowerGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FDF3A9" />
+      <stop offset="35%" stop-color="#DAA520" />
+      <stop offset="70%" stop-color="#B8860B" />
+      <stop offset="100%" stop-color="#7B5907" />
+    </linearGradient>
+
+    <!-- Charcoal / Black Architectural Steel -->
+    <linearGradient id="charcoalGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2D3035" />
+      <stop offset="50%" stop-color="#181A1D" />
+      <stop offset="100%" stop-color="#0A0B0D" />
+    </linearGradient>
+
+    <!-- Facet Highlight -->
+    <linearGradient id="bevelLight" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Drop Shadows -->
+    <filter id="subtleGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#B8860B" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <g transform="translate(0, 20)">
+    <!-- ==================== SKYSCRAPERS / BUILDINGS ==================== -->
+    <!-- Building 1 (Far Left Gold Spire) -->
+    <polygon points="340,285 365,245 385,255 365,300" fill="url(#goldGradient)" />
+    
+    <!-- Building 2 (Mid-Left Tower) -->
+    <polygon points="375,230 425,185 450,205 405,270" fill="url(#charcoalGrad)" stroke="url(#goldGradient)" stroke-width="2"/>
+    <line x1="400" y1="210" x2="385" y2="255" stroke="url(#goldGradient)" stroke-width="2.5" />
+    <line x1="420" y1="195" x2="400" y2="260" stroke="url(#goldGradient)" stroke-width="2.5" />
+
+    <!-- Building 3 (Tall Central Skyscraper with Slanted Roof) -->
+    <g>
+      <!-- Base & Facade -->
+      <polygon points="445,100 488,145 488,380 445,355" fill="url(#charcoalGrad)" stroke="url(#goldGradient)" stroke-width="3"/>
+      <!-- Gold Right Facet -->
+      <polygon points="488,145 528,185 528,380 488,380" fill="url(#goldTowerGrad)" />
+      <!-- Vertical Window Stripes on Center Tower -->
+      <line x1="498" y1="165" x2="498" y2="375" stroke="#FFFFFF" stroke-opacity="0.4" stroke-width="2"/>
+      <line x1="508" y1="175" x2="508" y2="375" stroke="#FFFFFF" stroke-opacity="0.4" stroke-width="2"/>
+      <line x1="518" y1="185" x2="518" y2="375" stroke="#FFFFFF" stroke-opacity="0.4" stroke-width="2"/>
+    </g>
+
+    <!-- Building 4 (Right Tower) -->
+    <polygon points="528,215 565,245 565,395 528,380" fill="url(#charcoalGrad)" stroke="url(#goldGradient)" stroke-width="2"/>
+    <line x1="545" y1="230" x2="545" y2="390" stroke="url(#goldGradient)" stroke-width="2" />
+
+    <!-- Gold Accent Frame around Towers -->
+    <path d="M375,230 L425,185 L445,100 L488,145 L528,185 L565,245" fill="none" stroke="url(#goldGradient)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- ==================== GABLE ROOF & ATTIC WINDOW ==================== -->
+    <!-- Gable Roof Triangle -->
+    <polygon points="445,395 320,510 570,510" fill="url(#charcoalGrad)" />
+    <!-- Golden Eaves of Roof -->
+    <polyline points="305,515 445,390 585,515" fill="none" stroke="url(#goldGradient)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Inner White Eave Line -->
+    <polyline points="315,515 445,400 575,515" fill="none" stroke="#FFFFFF" stroke-opacity="0.8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- 4-Pane Square Attic Window in Gold -->
+    <g transform="translate(425, 460)">
+      <rect x="0" y="0" width="18" height="18" fill="url(#goldGradient)" rx="2"/>
+      <rect x="22" y="0" width="18" height="18" fill="url(#goldGradient)" rx="2"/>
+      <rect x="0" y="22" width="18" height="18" fill="url(#goldGradient)" rx="2"/>
+      <rect x="22" y="22" width="18" height="18" fill="url(#goldGradient)" rx="2"/>
+    </g>
+
+    <!-- ==================== MONOGRAM "C" (GOLD) ==================== -->
+    <!-- Left Golden 3D "C" -->
+    <path d="M 370,305 
+             C 320,270 230,280 185,340 
+             C 135,410 145,510 205,565 
+             C 260,615 350,620 405,565 
+             L 370,525 
+             C 335,560 270,560 235,525 
+             C 195,485 190,415 225,375 
+             C 255,340 310,335 345,360 
+             Z" 
+          fill="url(#goldGradient)" 
+          filter="url(#subtleGlow)"/>
+
+    <!-- ==================== MONOGRAM "M" (BLACK & GOLD) ==================== -->
+    <!-- Main Architectural 'M' body in Charcoal/Black -->
+    <path d="M 455,320 
+             L 535,490 
+             L 605,335 
+             L 605,540 
+             L 660,540 
+             L 660,265 
+             L 580,445 
+             L 455,270 
+             Z" 
+          fill="url(#charcoalGrad)" 
+          stroke="#111317" stroke-width="1"/>
+
+    <!-- Golden Facet on the Right Wing of 'M' -->
+    <polygon points="605,480 660,400 660,540 605,540" fill="url(#goldGradient)" />
+
+    <!-- 3D Bevel Line on M -->
+    <polyline points="455,270 580,445 660,265" fill="none" stroke="url(#goldGradient)" stroke-width="4" stroke-linejoin="round"/>
+
+    <!-- ==================== GOLDEN HORIZON ARCH ==================== -->
+    <!-- Sweeping slender arch underneath -->
+    <path d="M 120,590 Q 440,540 760,590 Q 440,555 120,590 Z" fill="url(#goldGradient)" filter="url(#subtleGlow)"/>
+
+    <!-- ==================== TYPOGRAPHY ==================== -->
+    <!-- Line 1: "CM PROPERTY" -->
+    <g transform="translate(440, 675)">
+      <!-- CM in Gold Serif -->
+      <text x="-345" y="0" font-family="'Cinzel', 'Playfair Display', 'Times New Roman', serif" font-size="82" font-weight="800" fill="url(#goldGradient)" letter-spacing="4">CM</text>
+      <!-- PROPERTY in Dark Charcoal / Gold on Dark -->
+      <text x="-165" y="0" font-family="'Cinzel', 'Playfair Display', 'Times New Roman', serif" font-size="82" font-weight="700" fill="#181A1F" letter-spacing="8">PROPERTY</text>
+    </g>
+
+    <!-- Line 2: "— AND BUILDERS —" -->
+    <g transform="translate(440, 725)">
+      <!-- Left hairline bar -->
+      <line x1="-340" y1="-8" x2="-180" y2="-8" stroke="url(#goldGradient)" stroke-width="3" stroke-linecap="round"/>
+      <!-- Text -->
+      <text x="0" y="0" text-anchor="middle" font-family="'Cinzel', 'Georgia', serif" font-size="34" font-weight="700" fill="#181A1F" letter-spacing="12">AND BUILDERS</text>
+      <!-- Right hairline bar -->
+      <line x1="180" y1="-8" x2="340" y2="-8" stroke="url(#goldGradient)" stroke-width="3" stroke-linecap="round"/>
+    </g>
+
+    <!-- Line 3: "— BUILDING TRUST, CREATING FUTURES —" -->
+    <g transform="translate(440, 770)">
+      <!-- Left small gold line -->
+      <line x1="-330" y1="-5" x2="-290" y2="-5" stroke="url(#goldGradient)" stroke-width="2.5"/>
+      <!-- Text in Gold -->
+      <text x="0" y="0" text-anchor="middle" font-family="'Cinzel', 'Georgia', 'Arial', serif" font-size="20" font-weight="600" fill="url(#goldGradient)" letter-spacing="5">BUILDING TRUST, CREATING FUTURES</text>
+      <!-- Right small gold line -->
+      <line x1="290" y1="-5" x2="330" y2="-5" stroke="url(#goldGradient)" stroke-width="2.5"/>
+    </g>
+  </g>
+</svg>`;
+
+// Also a Dark Navy-compatible SVG variant (where "PROPERTY" & "AND BUILDERS" use crisp gold/white for dark mode)
+const svgContentDarkTheme = svgContent
+  .replace('fill="#181A1F" letter-spacing="8">PROPERTY', 'fill="url(#goldGradient)" letter-spacing="8">PROPERTY')
+  .replace('fill="#181A1F" letter-spacing="12">AND BUILDERS', 'fill="#FFFFFF" letter-spacing="12">AND BUILDERS');
+
+async function main() {
+  const publicDir = path.resolve('public');
+  if (!fs.existsSync(publicDir)) {
+    fs.mkdirSync(publicDir, { recursive: true });
+  }
+
+  // 1. Write the clean transparent SVG to public/icon.svg and public/logo.svg
+  fs.writeFileSync(path.join(publicDir, 'icon.svg'), svgContent, 'utf-8');
+  fs.writeFileSync(path.join(publicDir, 'logo.svg'), svgContent, 'utf-8');
+  fs.writeFileSync(path.join(publicDir, 'logo-light.svg'), svgContentDarkTheme, 'utf-8');
+
+  // Also save to src/assets for direct React imports
+  const assetsDir = path.resolve('src/assets');
+  if (!fs.existsSync(assetsDir)) {
+    fs.mkdirSync(assetsDir, { recursive: true });
+  }
+  fs.writeFileSync(path.join(assetsDir, 'property_hub_logo.svg'), svgContent, 'utf-8');
+  fs.writeFileSync(path.join(assetsDir, 'property_hub_logo_dark.svg'), svgContentDarkTheme, 'utf-8');
+
+  console.log('SVGs created successfully.');
+
+  // 2. Generate PNGs: 192x192, 512x512, apple-touch-icon 180x180, and maskable 512x512
+  const svgBuffer = Buffer.from(svgContentDarkTheme);
+
+  // 192x192
+  await sharp(svgBuffer)
+    .resize(192, 192)
+    .png()
+    .toFile(path.join(publicDir, 'pwa-192x192.png'));
+
+  // 512x512
+  await sharp(svgBuffer)
+    .resize(512, 512)
+    .png()
+    .toFile(path.join(publicDir, 'pwa-512x512.png'));
+
+  // 180x180 Apple Touch Icon
+  await sharp(svgBuffer)
+    .resize(180, 180)
+    .png()
+    .toFile(path.join(publicDir, 'apple-touch-icon.png'));
+
+  // 512x512 Maskable Icon (safe zone padded with dark navy background)
+  const paddedSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1000" height="1000">
+    <rect width="1000" height="1000" fill="#0A1128" />
+    <g transform="translate(100, 100) scale(0.8)">
+      ${svgContent.replace(/<\/?svg[^>]*>/g, '')}
+    </g>
+  </svg>`;
+
+  await sharp(Buffer.from(paddedSvg))
+    .resize(512, 512)
+    .png()
+    .toFile(path.join(publicDir, 'pwa-maskable-512x512.png'));
+
+  // Favicon (32x32)
+  await sharp(svgBuffer)
+    .resize(32, 32)
+    .png()
+    .toFile(path.join(publicDir, 'favicon.ico'));
+
+  console.log('All PWA icons generated successfully!');
+}
+
+main().catch(console.error);

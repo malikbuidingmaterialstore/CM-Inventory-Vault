@@ -1,0 +1,273 @@
+{
+  "users": [
+    {
+      "user_id": "usr_owner",
+      "username": "owner",
+      "full_name": "Property Hub Director",
+      "password_hash": "7be5037bf088f1d43adb97006d695dba99a614c82fcd0e6b10abdd83aeccd265",
+      "role": "owner",
+      "is_active": true,
+      "created_at": "2026-01-01T00:00:00.000Z",
+      "last_login_at": "2026-10-10T10:45:35.800Z",
+      "subscription_tier": "pro",
+      "is_ad_free": true
+    },
+    {
+      "user_id": "usr_1ddabda73ca4_1790850166095",
+      "username": "testuser",
+      "full_name": "Test User",
+      "password_hash": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+      "role": "user",
+      "is_active": true,
+      "phone": "03001234567",
+      "email": "test@example.com",
+      "agency_name": "",
+      "payment_status": "pending",
+      "created_at": "2026-10-01T10:22:46.095Z",
+      "subscription_tier": "free",
+      "is_ad_free": false
+    },
+    {
+      "user_id": "usr_10ebb119ba62_1790941574551",
+      "username": "ali_agent",
+      "full_name": "Muhammad Ali",
+      "password_hash": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+      "role": "user",
+      "is_active": true,
+      "phone": "03012345678",
+      "email": "ali@example.com",
+      "agency_name": "",
+      "payment_status": "pending",
+      "created_at": "2026-10-02T11:46:14.551Z",
+      "subscription_tier": "free",
+      "is_ad_free": false
+    }
+  ],
+  "sessions": [
+    {
+      "session_id": "sess_ef0bdaefe4cea6634260aed886a8861f",
+      "user_id": "usr_owner",
+      "token": "phtk_9158a8cf2cc768f775bafcdbb96deb2b487d205bc6b8168a014e843b957d0080",
+      "expires_at": "2026-11-01T12:02:28.344Z",
+      "created_at": "2026-10-02T12:02:28.344Z"
+    },
+    {
+      "session_id": "sess_43e170a77c18e1bf1ab019ef3c6aa5c1",
+      "user_id": "usr_owner",
+      "token": "phtk_5f39f248cdaae12a6b138d3d4ec341073c6223fed42d6d2196ceb1c0d5d4688d",
+      "expires_at": "2026-11-09T10:31:37.059Z",
+      "created_at": "2026-10-10T10:31:37.059Z"
+    },
+    {
+      "session_id": "sess_f66276ea9b4e26bff73b00f81c6209c7",
+      "user_id": "usr_owner",
+      "token": "phtk_f84d332eaa70904a0a369e9fd3cd3682aa5282486d45787d545fb2b9fe77f5ad",
+      "expires_at": "2026-11-09T10:40:44.643Z",
+      "created_at": "2026-10-10T10:40:44.643Z"
+    }
+  ],
+  "properties": [],
+  "activity_logs": [
+    {
+      "log_id": "log_1791629135802_4gw8",
+      "user_id": "usr_owner",
+      "username": "owner",
+      "action": "LOGIN",
+      "details": "Successful login",
+      "timestamp": "2026-10-10T10:45:35.802Z"
+    },
+    {
+      "log_id": "log_1791628844644_xmci",
+      "user_id": "usr_owner",
+      "username": "owner",
+      "action": "LOGIN",
+      "details": "Successful login",
+      "timestamp": "2026-10-10T10:40:44.644Z"
+    },
+    {
+      "log_id": "log_1791628297059_6hdl",
+      "user_id": "usr_owner",
+      "username": "owner",
+      "action": "LOGIN",
+      "details": "Successful login",
+      "timestamp": "2026-10-10T10:31:37.059Z"
+    },
+    {
+      "log_id": "log_1790942548372_4rrq",
+      "user_id": "usr_owner",
+      "username": "owner",
+      "action": "USER_STATUS",
+      "details": "Enabled employee hamza_realtor",
+      "timestamp": "2026-10-02T12:02:28.372Z"
+    },
+    {
+      "log_id": "log_1790942548361_pwbk",
+      "user_id": "usr_owner",
+      "username": "owner",
+      "action": "USER_STATUS",
+      "details": "Disabled employee hamza_realtor",
+      "timestamp": "2026-10-02T12:02:28.361Z"
+    },
+    {
+      "log_id": "log_1790942548344_vvzh",
+      "user_id": "usr_owner",
+      "username": "owner",
+      "action": "LOGIN",
+      "details": "Successful login",
+      "timestamp": "2026-10-02T12:02:28.345Z"
+    },
+    {
+      "log_id": "log_1790942510710_908q",
+      "user_id": "usr_7d01f0d8b4bd_1790942510710",
+      "username": "hamza_realtor",
+      "action": "REGISTER_PUBLIC",
+      "details": "New user registered: Hamza Khan (03219876543)",
+      "timestamp": "2026-10-02T12:01:50.710Z"
+    },
+    {
+      "log_id": "log_1790941574551_te5q",
+      "user_id": "usr_system",
+      "username": "system",
+      "action": "ACCESS_REQUEST",
+      "details": "New user registration from Muhammad Ali (03012345678)",
+      "timestamp": "2026-10-02T11:46:14.551Z"
+    },
+    {
+      "log_id": "log_1790850166095_km45",
+      "user_id": "usr_system",
+      "username": "system",
+      "action": "ACCESS_REQUEST",
+      "details": "New user registration from Test User (03001234567)",
+      "timestamp": "2026-10-01T10:22:46.095Z"
+    },
+    {
+      "log_id": "log_clean_1790849352662",
+      "user_id": "usr_owner",
+      "username": "owner",
+      "action": "ACCOUNTS_PURGED",
+      "details": "All prior sample accounts, requests, and listings permanently deleted",
+      "timestamp": "2026-10-01T10:09:12.662Z"
+    }
+  ],
+  "settings": {
+    "office_name": "CM INVENTORY VAULT",
+    "currency": "PKR",
+    "default_city": "Lahore",
+    "popular_societies": [
+      "Al Rehman Garden",
+      "Bahria Town",
+      "DHA",
+      "Lake City",
+      "Park View City",
+      "New Lahore City",
+      "Central Park Housing Scheme",
+      "Fazaia Housing Scheme",
+      "WAPDA Town",
+      "Johar Town"
+    ],
+    "popular_sizes": [
+      "3 Marla",
+      "5 Marla",
+      "7 Marla",
+      "10 Marla",
+      "1 Kanal",
+      "2 Kanal",
+      "4 Marla Commercial",
+      "8 Marla Commercial"
+    ],
+    "owner_email": "sacc5038@gmail.com",
+    "owner_phone": "+92 3082665978",
+    "owner_whatsapp": "+92 3082665978",
+    "ads_enabled": false,
+    "google_ad_client": "",
+    "google_ad_slot": "",
+    "pro_monthly_price_pkr": 1500,
+    "sponsor_ads": [
+      {
+        "ad_id": "ad_cement_01",
+        "title": "Supreme Ready-Mix & DG Cement",
+        "tagline": "Best Wholesale Rates for Real Estate Builders",
+        "description": "Factory direct delivery across all housing schemes. Exclusive bulk discount rates for Property Hub realtors.",
+        "sponsor_name": "Askari & DG Cement Supply Hub",
+        "category": "Building Materials",
+        "phone": "+92 300 8492011",
+        "whatsapp": "+92 300 8492011",
+        "cta_text": "Call for Daily Rate",
+        "cta_link": "tel:+923008492011",
+        "is_active": true,
+        "badge_label": "HOT DEAL"
+      },
+      {
+        "ad_id": "ad_steel_02",
+        "title": "Mughal & Amreli Steel (Grade 60 Saria)",
+        "tagline": "Certified High-Tensile Rebar with Lab Test Reports",
+        "description": "Guaranteed weight and millimeter accuracy. Direct site unloading within 24 hours of booking.",
+        "sponsor_name": "Pak Steel Traders Lahore",
+        "category": "Building Materials",
+        "phone": "+92 321 4455889",
+        "whatsapp": "+92 321 4455889",
+        "cta_text": "WhatsApp Inquiry",
+        "cta_link": "https://wa.me/923214455889",
+        "is_active": true,
+        "badge_label": "VERIFIED"
+      },
+      {
+        "ad_id": "ad_bank_03",
+        "title": "Meezan & Habib Islamic Home Financing",
+        "tagline": "Fast Plot Purchase & Home Construction Loans",
+        "description": "Shariah-compliant flexible repayment plans up to 25 years. Special fast-track processing for Property Hub clients.",
+        "sponsor_name": "Islamic Housing Finance Desk",
+        "category": "Bank Loan",
+        "phone": "+92 301 5566778",
+        "whatsapp": "+92 301 5566778",
+        "cta_text": "Check Eligibility",
+        "cta_link": "tel:+923015566778",
+        "is_active": true,
+        "badge_label": "FINANCING"
+      },
+      {
+        "ad_id": "ad_arch_04",
+        "title": "Elite 3D Front Elevations & Floor Maps",
+        "tagline": "LDA & Society Approved Architecture Blueprints",
+        "description": "Stunning modern Spanish & contemporary house designs for 3, 5, 10 Marla and 1 Kanal plots. Fast turnaround.",
+        "sponsor_name": "Apex Design & Construction Studio",
+        "category": "Architect & 3D",
+        "phone": "+92 333 7788990",
+        "whatsapp": "+92 333 7788990",
+        "cta_text": "View Portfolio",
+        "cta_link": "https://wa.me/923337788990",
+        "is_active": true,
+        "badge_label": "PREMIUM"
+      }
+    ],
+    "pro_features_description": "100% Ad-Free interface, Verified Pro Realtor Gold Badge, Priority Cloud Sync & Unlimited Photos, Direct WhatsApp Support."
+  },
+  "access_requests": [
+    {
+      "request_id": "req_469c156fa562_1790941574551",
+      "user_id": "usr_10ebb119ba62_1790941574551",
+      "full_name": "Muhammad Ali",
+      "phone": "03012345678",
+      "email": "ali@example.com",
+      "agency_name": "",
+      "city": "",
+      "desired_username": "ali_agent",
+      "password_hash": "008c70392e3abfbd0fa47bbc2ed96aa99bd49e159727fcba0f2e6abeb3a9d601",
+      "status": "pending_payment",
+      "created_at": "2026-10-02T11:46:14.551Z"
+    },
+    {
+      "request_id": "req_0bd3d5899aff_1790850166095",
+      "user_id": "usr_1ddabda73ca4_1790850166095",
+      "full_name": "Test User",
+      "phone": "03001234567",
+      "email": "test@example.com",
+      "agency_name": "",
+      "city": "",
+      "desired_username": "testuser",
+      "password_hash": "b55c8792d1ce458e279308835f8a97b580263503e76e1998e279703e35ad0c2e",
+      "status": "pending_payment",
+      "created_at": "2026-10-01T10:22:46.095Z"
+    }
+  ]
+}

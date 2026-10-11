@@ -1,0 +1,6 @@
+{
+  "name": "PROPERTY HUB",
+  "description": "Offline & Online Real Estate Property Management Progressive Web App for employees and property records.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
