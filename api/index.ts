@@ -207,40 +207,59 @@ app.post('/api/auth/register', (req: any, res: any) => {
 });
 
 app.post('/api/auth/request-access', (req: any, res: any) => {
-  const { full_name, phone, email, username, password, agency_name, city } = req.body;
-  if (!full_name || !phone || !email || !username || !password) {
-    return res.status(400).json({ error: 'Required fields missing' });
+  const body = req.body || {};
+  const full_name = body.full_name;
+  const username = body.desired_username || body.username;
+  const password = body.password;
+  const phone = body.phone || '';
+  const email = body.email || '';
+  const agency_name = body.agency_name || '';
+  const city = body.city || 'Lahore';
+
+  if (!full_name || !username || !password) {
+    return res.status(400).json({ error: 'Full Name, Username, and Password are required' });
   }
 
   const db = readDB();
-  const exists = db.users.some((u: any) => u.username.toLowerCase() === username.trim().toLowerCase());
+  const normalized = String(username).trim();
+  const exists = db.users.some((u: any) => u.username.toLowerCase() === normalized.toLowerCase());
   if (exists) {
-    return res.status(400).json({ error: 'Username is already taken' });
+    return res.status(400).json({ error: 'This username is already taken. Please choose another username.' });
   }
 
+  const token = 'phtk_' + crypto.randomBytes(24).toString('hex');
   const newUser = {
     user_id: 'usr_' + Date.now(),
-    username: username.trim(),
-    full_name: full_name.trim(),
+    username: normalized,
+    full_name: String(full_name).trim(),
     password_hash: hashPassword(password),
-    phone,
-    email,
-    agency_name: agency_name || '',
-    city: city || 'Lahore',
+    phone: String(phone).trim(),
+    email: String(email).trim().toLowerCase(),
+    agency_name: String(agency_name).trim(),
+    city: String(city).trim(),
     role: 'user',
     is_active: true,
-    payment_status: 'free_trial',
+    payment_status: 'paid',
     subscription_tier: 'free',
     is_ad_free: false,
-    created_at: new Date().toISOString()
+    current_token: token,
+    created_at: new Date().toISOString(),
+    last_login_at: new Date().toISOString(),
   };
 
   db.users.push(newUser);
   writeDB(db);
 
+  const safeUser = { ...newUser };
+  delete (safeUser as any).password_hash;
+  delete (safeUser as any).current_token;
+
   res.json({
     success: true,
-    message: 'Account created successfully! You can now log in.'
+    message: 'Account created successfully!',
+    user: safeUser,
+    token,
+    expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
   });
 });
 
