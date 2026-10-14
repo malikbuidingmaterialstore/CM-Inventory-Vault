@@ -52,23 +52,14 @@ export const TopBar: React.FC<TopBarProps> = ({
         {/* Zone 1: Brand & Logo */}
         <button
           onClick={() => onNavigate('dashboard')}
-          className="flex items-center gap-2 sm:gap-3 text-left focus:outline-none group shrink-0 min-h-[44px]"
+          className="flex items-center gap-2 text-left focus:outline-none group shrink-0 min-h-[44px]"
           aria-label="Go to Dashboard"
         >
-          <div className="w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center shrink-0">
-            <BrandLogo size="xs" variant="icon" />
-          </div>
-          <div>
-            <div className="text-sm sm:text-base font-bold tracking-tight text-amber-600 dark:text-amber-400 group-hover:text-amber-500 font-brand transition-colors flex items-center gap-1.5">
-              <span>CM</span>
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-700 dark:text-amber-300 font-semibold hidden xs:inline">
-                VAULT
-              </span>
-            </div>
-            <div className="text-[9px] sm:text-[10px] text-stone-600 dark:text-stone-300 font-bold tracking-wider hidden sm:block font-brand">
-              INVENTORY VAULT
-            </div>
-          </div>
+          <img
+            src="/logo.png"
+            alt="CM INVENTORY VAULT"
+            className="h-8 sm:h-10 w-auto max-w-[170px] sm:max-w-[220px] object-contain filter drop-shadow-[0_2px_8px_rgba(212,175,55,0.35)]"
+          />
         </button>
 
         {/* Desktop Quick Navigation Links */}
