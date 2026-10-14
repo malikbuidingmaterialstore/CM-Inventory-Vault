@@ -35,6 +35,8 @@ interface DashboardViewProps {
   onLogout: () => void;
   sponsorAds?: SponsorAd[];
   adsEnabled?: boolean;
+  googleAdClient?: string;
+  googleAdSlot?: string;
   onOpenUpgradeModal?: () => void;
 }
 
@@ -48,6 +50,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onLogout,
   sponsorAds = [],
   adsEnabled = true,
+  googleAdClient,
+  googleAdSlot,
   onOpenUpgradeModal,
 }) => {
   const { theme, toggleTheme, isNight } = useTheme();
@@ -139,10 +143,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
   return (
     <div className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6 pb-28 space-y-5 sm:space-y-6 font-sans">
-      {/* Welcome Banner - MSA Royal & Sapphire Blue Container */}
+      {/* Welcome Banner - CM INVENTORY VAULT Gold & Onyx Container */}
       <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl theme-bg-card border theme-border p-4 sm:p-7 theme-shadow transition-colors">
-        {/* Subtle MSA Cyan / Sapphire ambient glow */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-sky-500/10 dark:bg-sky-400/10 rounded-full blur-3xl pointer-events-none" />
+        {/* Subtle Gold / Amber ambient glow */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/10 dark:bg-amber-400/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
           <div>
@@ -222,6 +226,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         user={user}
         ads={sponsorAds}
         adsEnabled={adsEnabled}
+        googleAdClient={googleAdClient}
+        googleAdSlot={googleAdSlot}
         onOpenUpgradeModal={onOpenUpgradeModal || (() => {})}
       />
 

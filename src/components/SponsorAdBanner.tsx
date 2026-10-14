@@ -19,6 +19,8 @@ interface SponsorAdBannerProps {
   user: User;
   ads?: SponsorAd[];
   adsEnabled?: boolean;
+  googleAdClient?: string;
+  googleAdSlot?: string;
   onOpenUpgradeModal: () => void;
   variant?: 'banner' | 'card' | 'compact';
   className?: string;
@@ -28,6 +30,8 @@ export const SponsorAdBanner: React.FC<SponsorAdBannerProps> = ({
   user,
   ads = [],
   adsEnabled = true,
+  googleAdClient,
+  googleAdSlot,
   onOpenUpgradeModal,
   variant = 'banner',
   className = '',
@@ -37,8 +41,60 @@ export const SponsorAdBanner: React.FC<SponsorAdBannerProps> = ({
     return null;
   }
 
-  // Active ads list
+  // Active custom sponsor ads
   const activeAds = ads.filter(a => a.is_active);
+
+  // Dynamically load Google AdSense script if client is provided
+  useEffect(() => {
+    if (googleAdClient && typeof window !== 'undefined') {
+      const existingScript = document.getElementById('google-adsense-script');
+      if (!existingScript) {
+        const script = document.createElement('script');
+        script.id = 'google-adsense-script';
+        script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${googleAdClient}`;
+        script.async = true;
+        script.crossOrigin = 'anonymous';
+        document.head.appendChild(script);
+      }
+      try {
+        // @ts-ignore
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+      } catch (e) {
+        // ignore adsense push error during hot reload
+      }
+    }
+  }, [googleAdClient, googleAdSlot]);
+
+  // If Google AdSense client & slot are configured, render official Google responsive ad unit
+  if (googleAdClient && googleAdSlot) {
+    return (
+      <div className={`relative overflow-hidden rounded-2xl border theme-border theme-bg-card p-3 my-3 shadow-sm ${className}`}>
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-[10px] font-mono uppercase tracking-wider text-amber-700 dark:text-amber-400 font-bold bg-amber-500/10 px-2 py-0.5 rounded">
+            Google Sponsored Ad
+          </span>
+          <button
+            onClick={onOpenUpgradeModal}
+            className="text-[10px] text-amber-700 dark:text-amber-400 font-semibold hover:underline flex items-center gap-1"
+          >
+            <Crown className="w-3 h-3 text-amber-600" />
+            <span>Remove Ads (PRO)</span>
+          </button>
+        </div>
+        <div className="min-h-[90px] flex items-center justify-center bg-black/5 dark:bg-white/5 rounded-xl overflow-hidden text-center text-xs theme-text-tertiary">
+          <ins
+            className="adsbygoogle"
+            style={{ display: 'block', minWidth: '250px', width: '100%', minHeight: '90px' }}
+            data-ad-client={googleAdClient}
+            data-ad-slot={googleAdSlot}
+            data-ad-format="auto"
+            data-full-width-responsive="true"
+          />
+        </div>
+      </div>
+    );
+  }
+
   if (activeAds.length === 0) {
     return null;
   }

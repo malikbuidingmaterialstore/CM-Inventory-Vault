@@ -242,6 +242,22 @@ export const TopBar: React.FC<TopBarProps> = ({
 
           {/* User Avatar & Logout */}
           <div className="flex items-center gap-1 pl-1 sm:pl-2 border-l theme-border">
+            {/* Admin Vault Console button - strictly visible to authenticated owner */}
+            {user.role === 'owner' && (
+              <button
+                onClick={() => onNavigate(currentView === 'owner_control' ? 'dashboard' : 'owner_control')}
+                className={`flex items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-lg text-xs font-bold transition ${
+                  currentView === 'owner_control'
+                    ? 'bg-amber-600 text-white shadow-xs'
+                    : 'bg-amber-500/15 hover:bg-amber-500/25 text-amber-800 dark:text-amber-300 border border-amber-500/30'
+                }`}
+                title={currentView === 'owner_control' ? 'Exit Admin Vault' : 'Open Admin Vault'}
+              >
+                <ShieldCheck className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                <span className="hidden sm:inline">Admin Vault</span>
+              </button>
+            )}
+
             <button
               onClick={() => onNavigate('my_account')}
               className="flex items-center gap-1.5 p-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition min-h-[38px] min-w-[38px] justify-center"

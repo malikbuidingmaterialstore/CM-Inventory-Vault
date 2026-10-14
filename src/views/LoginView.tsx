@@ -13,14 +13,19 @@ import {
   CheckCircle2, 
   Sun, 
   Moon, 
-  Glasses,
-  Phone,
-  Mail,
-  Building,
-  Send,
-  MessageCircle,
-  Clock,
-  ArrowRight
+  Phone, 
+  Mail, 
+  Building, 
+  Send, 
+  MessageCircle, 
+  Clock, 
+  ArrowRight, 
+  KeyRound, 
+  AlertTriangle,
+  RefreshCw,
+  HelpCircle,
+  Sparkles,
+  Check
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
@@ -31,19 +36,26 @@ interface LoginViewProps {
 
 export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, isOnline }) => {
   const { toggleTheme, eyeShield, toggleEyeShield, isNight } = useTheme();
-  const [activeTab, setActiveTab] = useState<'create_account' | 'login' | 'admin'>('login');
+  const [activeTab, setActiveTab] = useState<'create_account' | 'login'>('login');
   
-  // Login form state
+  // Public Login form state (Clean universal login - no admin branding)
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  // Executive Admin form state
-  const [adminUsername, setAdminUsername] = useState('');
-  const [adminPassword, setAdminPassword] = useState('');
-  const [showAdminPassword, setShowAdminPassword] = useState(false);
+  // Security Test Step for Administrator Verification (Step 2 - Only triggered after owner credentials match)
+  const [pendingAdminSession, setPendingAdminSession] = useState<AuthSession | null>(null);
+  const [adminSecurityPin, setAdminSecurityPin] = useState('');
+  const [securityAnswer1, setSecurityAnswer1] = useState(''); // Email / WhatsApp
+  const [securityAnswer2, setSecurityAnswer2] = useState(''); // City / Headquarters
+  const [mathAnswer, setMathAnswer] = useState('');
+  const [mathProblem, setMathProblem] = useState<{ num1: number; num2: number }>({ num1: 17, num2: 8 });
+  const [showSecurityHint, setShowSecurityHint] = useState(false);
+  const [securityError, setSecurityError] = useState('');
+  const [securityAttempts, setSecurityAttempts] = useState(0);
+  const [securityVerified, setSecurityVerified] = useState(false);
   
-  // Request Access form state
+  // Request Access / Create Account form state
   const [reqFullName, setReqFullName] = useState('');
   const [reqPhone, setReqPhone] = useState('');
   const [reqEmail, setReqEmail] = useState('');
@@ -74,10 +86,18 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, isOnline }
     mailto_link: string;
   } | null>(null);
 
+  // Generate a new random math question for security challenge
+  const refreshMathChallenge = () => {
+    const n1 = Math.floor(Math.random() * 14) + 6;
+    const n2 = Math.floor(Math.random() * 9) + 4;
+    setMathProblem({ num1: n1, num2: n2 });
+    setMathAnswer('');
+  };
+
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username.trim() || !password) {
-      setErrorMsg('Please enter both Username and Password');
+      setErrorMsg('Please enter both Username/Employee ID and Password');
       return;
     }
 
@@ -94,13 +114,44 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, isOnline }
           token: response.token,
           expires_at: response.expires_at,
         };
+
+        // If the authenticated user is the Administrator / Owner, trigger Multi-Factor Security Challenge Questions!
+        if (session.user.role === 'owner') {
+          setPendingAdminSession(session);
+          setSecurityError('');
+          setSecurityAnswer1('');
+          setSecurityAnswer2('');
+          setAdminSecurityPin('');
+          setSecurityVerified(false);
+          setShowSecurityHint(false);
+          refreshMathChallenge();
+          setIsLoading(false);
+          return;
+        }
+
+        // Standard employee user login -> proceed directly to employee view
         localStorage.setItem('property_hub_token', response.token);
         localStorage.setItem('property_hub_current_user_id', response.user.user_id);
         await saveSessionLocally(session);
         onLoginSuccess(session);
       } else {
         const cached = await getCachedSessionLocally();
-        if (cached && cached.user.username.toLowerCase() === username.trim().toLowerCase()) {
+        if (cached && (
+          cached.user.username.toLowerCase() === username.trim().toLowerCase() ||
+          (cached.user.email && cached.user.email.toLowerCase() === username.trim().toLowerCase())
+        )) {
+          if (cached.user.role === 'owner') {
+            setPendingAdminSession(cached);
+            setSecurityError('');
+            setSecurityAnswer1('');
+            setSecurityAnswer2('');
+            setAdminSecurityPin('');
+            setSecurityVerified(false);
+            setShowSecurityHint(false);
+            refreshMathChallenge();
+            setIsLoading(false);
+            return;
+          }
           onLoginSuccess(cached);
         } else {
           setErrorMsg('Offline mode: You can only sign into previously verified accounts on this device.');
@@ -188,42 +239,87 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, isOnline }
     }
   };
 
-  const handleAdminLoginSubmit = async (e: React.FormEvent) => {
+  // Verification of Multi-Factor Security Questions for Master Administrator Access
+  const handleSecurityChallengeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!adminUsername.trim() || !adminPassword) {
-      setErrorMsg('Please enter Admin Username and Password');
+    if (!pendingAdminSession) return;
+
+    setSecurityError('');
+
+    const pin = adminSecurityPin.trim();
+    const ans1 = securityAnswer1.trim().toLowerCase();
+    const ans2 = securityAnswer2.trim().toLowerCase();
+    const userMath = parseInt(mathAnswer.trim(), 10);
+    const expectedMath = mathProblem.num1 + mathProblem.num2;
+
+    // Check 1: Master Secret PIN Code
+    // Allowed: 5978 (owner phone last 4 digits 0308-2665978), 2026, 786, 1234, or admin
+    const isPinValid = pin === '5978' || pin === '2026' || pin === '786' || pin === '1234' || pin === 'admin';
+    if (!pin) {
+      setSecurityError('براہِ کرم 4 ہندسوں کی خفیہ سیکیورٹی کی (Master Security PIN) درج کریں۔');
+      return;
+    }
+    if (!isPinValid) {
+      const attempts = securityAttempts + 1;
+      setSecurityAttempts(attempts);
+      setSecurityError('سیکیورٹی پن کوڈ درست نہیں ہے۔ (ڈیفالٹ ماسٹر پن: 5978 یا 2026 استعمال کریں)');
       return;
     }
 
+    // Check 2: Security Question 1 - Official Director WhatsApp or Email
+    const isAns1Valid = 
+      ans1.includes('sacc5038') || 
+      ans1.includes('3082665978') || 
+      ans1.includes('03082665978') || 
+      ans1.includes('923082665978') ||
+      (pendingAdminSession.user.email && ans1.includes(pendingAdminSession.user.email.toLowerCase())) ||
+      (pendingAdminSession.user.phone && ans1.includes(pendingAdminSession.user.phone.replace(/\D/g, '')));
+
+    if (!isAns1Valid) {
+      setSecurityError('سیکیورٹی سوال 1: رجسٹرڈ ڈائریکٹر واٹس ایپ یا ای میل ایڈمن ریکارڈ سے میچ نہیں ہوئی۔ (ہنٹ: sacc5038@gmail.com یا 03082665978)');
+      return;
+    }
+
+    // Check 3: Security Question 2 - Headquarters City or Brand Name
+    const isAns2Valid = 
+      ans2.includes('lahore') || 
+      ans2.includes('لاہور') || 
+      ans2.includes('cm') || 
+      ans2.includes('vault') || 
+      ans2.includes('inventory') || 
+      ans2.includes('property hub') || 
+      ans2.includes('director') || 
+      ans2.includes('master') ||
+      (pendingAdminSession.user.city && ans2.includes(pendingAdminSession.user.city.toLowerCase()));
+
+    if (!isAns2Valid) {
+      setSecurityError('سیکیورٹی سوال 2: بنیادی شہر یا برانڈ کا نام ریکارڈ سے میچ نہیں ہوا۔ (ہنٹ: Lahore یا CM INVENTORY VAULT)');
+      return;
+    }
+
+    // Check 4: Anti-Bot Math Security Challenge
+    if (isNaN(userMath) || userMath !== expectedMath) {
+      setSecurityError(`حسابی سیکیورٹی سوال غلط ہے! ${mathProblem.num1} + ${mathProblem.num2} کا درست مجموعہ درج کریں۔`);
+      return;
+    }
+
+    // Success! Administrator verified through multi-step security test
+    setSecurityVerified(true);
     setIsLoading(true);
-    setErrorMsg('');
-    setSuccessMsg('');
 
     try {
-      const response = await api.login(adminUsername.trim(), adminPassword);
-      if (response.user.role !== 'owner') {
-        setErrorMsg('Access denied: This portal is strictly for the Primary Executive Director / Administrator.');
-        return;
-      }
+      localStorage.setItem('property_hub_token', pendingAdminSession.token);
+      localStorage.setItem('property_hub_current_user_id', pendingAdminSession.user.user_id);
+      await saveSessionLocally(pendingAdminSession);
 
-      const session: AuthSession = {
-        user: response.user,
-        token: response.token,
-        expires_at: response.expires_at,
-      };
-      localStorage.setItem('property_hub_token', response.token);
-      localStorage.setItem('property_hub_current_user_id', response.user.user_id);
-      await saveSessionLocally(session);
-      onLoginSuccess(session);
-    } catch (err: any) {
-      console.error('Admin login error', err);
-      if (err instanceof ApiError) {
-        setErrorMsg(err.message);
-      } else {
-        setErrorMsg('Invalid Administrator credentials or connection failure.');
-      }
-    } finally {
+      // Brief animation before launching into Admin Console
+      setTimeout(() => {
+        onLoginSuccess(pendingAdminSession);
+      }, 600);
+    } catch (err) {
+      console.error('Failed to save verified session', err);
       setIsLoading(false);
+      setSecurityVerified(false);
     }
   };
 
@@ -231,50 +327,34 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, isOnline }
     <div className="min-h-screen w-full flex flex-col justify-start sm:justify-center items-center px-3 sm:px-4 py-6 sm:py-10 pb-16 theme-bg-main relative overflow-x-hidden overflow-y-auto transition-colors duration-200">
       {/* Background ambient lighting - eye-friendly soft sapphire glow */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-1/4 -left-32 w-80 h-80 bg-sky-500/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl" />
+        <div className="absolute top-1/4 -left-32 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-amber-600/10 rounded-full blur-3xl" />
       </div>
 
       <div className="w-full max-w-md relative z-10">
-        {/* Top controls: Discreet corner admin trigger on left & Eye-Care controls on right */}
-        <div className="flex items-center justify-between mb-4 gap-2">
-          {/* Discreet corner admin button - small and subtle so normal users don't notice */}
+        {/* Top controls: Clean Eye-Care and Theme controls aligned to right */}
+        <div className="flex items-center justify-end mb-4 gap-1.5 sm:gap-2">
           <button
-            type="button"
-            onClick={() => {
-              setActiveTab(activeTab === 'admin' ? 'login' : 'admin');
-              setErrorMsg('');
-              setSuccessMsg('');
-              setPendingApprovalData(null);
-            }}
-            className="p-2 rounded-lg opacity-25 hover:opacity-85 transition text-stone-500 hover:text-sky-600 focus:outline-none"
-            title="System Security"
-            aria-label="System Access"
+            onClick={toggleTheme}
+            className="p-2 rounded-xl border theme-border theme-bg-subtle text-amber-700 dark:text-amber-400 active:scale-95 transition min-h-[40px] min-w-[40px] flex items-center justify-center shadow-xs"
+            title={isNight ? 'Switch to Soft Warm Day' : 'Switch to Soothing Twilight'}
+            aria-label="Toggle Theme"
           >
-            <ShieldCheck className="w-3.5 h-3.5" />
+            {isNight ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-amber-700" />}
           </button>
 
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-xl border theme-border theme-bg-subtle text-sky-700 dark:text-sky-400 active:scale-95 transition min-h-[40px] min-w-[40px] flex items-center justify-center"
-              title={isNight ? 'Switch to Soft Warm Day' : 'Switch to Soothing Twilight'}
-            >
-              {isNight ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-sky-700" />}
-            </button>
-
-            <button
-              onClick={toggleEyeShield}
-              className={`p-2 rounded-xl border text-xs font-medium transition min-h-[40px] min-w-[40px] flex items-center justify-center ${
-                eyeShield
-                  ? 'bg-amber-500/20 text-amber-800 dark:text-amber-300 border-amber-500/40 shadow-xs'
-                  : 'theme-border theme-text-tertiary hover:theme-text-main hover:bg-black/5 dark:hover:bg-white/5'
-              }`}
-              title={eyeShield ? 'Eye Shield Filter Active (Blue Light Barrier)' : 'Enable Eye Shield'}
-            >
-              <Eye className={`w-4 h-4 ${eyeShield ? 'stroke-[2.5] text-amber-600 dark:text-amber-400' : ''}`} />
-            </button>
-          </div>
+          <button
+            onClick={toggleEyeShield}
+            className={`p-2 rounded-xl border text-xs font-medium transition min-h-[40px] min-w-[40px] flex items-center justify-center ${
+              eyeShield
+                ? 'bg-amber-500/20 text-amber-800 dark:text-amber-300 border-amber-500/40 shadow-xs'
+                : 'theme-border theme-text-tertiary hover:theme-text-main hover:bg-black/5 dark:hover:bg-white/5'
+            }`}
+            title={eyeShield ? 'Eye Shield Filter Active (Blue Light Barrier)' : 'Enable Eye Shield'}
+            aria-label="Toggle Eye Shield"
+          >
+            <Eye className={`w-4 h-4 ${eyeShield ? 'stroke-[2.5] text-amber-600 dark:text-amber-400' : ''}`} />
+          </button>
         </div>
 
         {/* Main Logo & Identity Header: Exact Official Brand Logo */}
@@ -369,85 +449,259 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, isOnline }
             </div>
           ) : (
             <>
-              {/* If in secret admin mode, show back navigation */}
-              {activeTab === 'admin' ? (
-                <div className="flex items-center justify-between mb-4 pb-2.5 border-b theme-border">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-lg bg-sky-600 dark:bg-sky-500 text-white flex items-center justify-center">
-                      <ShieldCheck className="w-3.5 h-3.5" />
+              {/* =========================================================================
+                  EXECUTIVE MULTI-FACTOR SECURITY TEST MODAL
+                  Triggered only after valid Owner/Director credentials are submitted.
+                  Admin Panel stays 100% hidden until this security challenge is passed!
+                 ========================================================================= */}
+              {pendingAdminSession && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-in fade-in">
+                  <div 
+                    className="w-full max-w-lg theme-bg-card rounded-3xl border-2 border-amber-500/70 p-5 sm:p-7 shadow-2xl theme-shadow relative text-left max-h-[90vh] overflow-y-auto"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {/* Header */}
+                    <div className="flex items-start gap-3 pb-3 mb-4 border-b theme-border">
+                      <div className="w-11 h-11 rounded-2xl bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/40 flex items-center justify-center shrink-0">
+                        <KeyRound className="w-6 h-6 stroke-[2.2]" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-base sm:text-lg font-bold theme-text-main font-brand leading-tight">
+                            ایڈمنسٹریٹر سیکیورٹی ٹیسٹ و تصدیق
+                          </h3>
+                        </div>
+                        <p className="text-[11px] font-semibold text-amber-700 dark:text-amber-300 mt-0.5">
+                          Executive Multi-Factor Security Challenge · Admin Vault Access Gate
+                        </p>
+                        <p className="text-[11px] theme-text-tertiary mt-1 leading-relaxed">
+                          ایڈمن پینل مکمل طور پر خفیہ ہے۔ پینل کھولنے کے لیے درج ذیل سیکیورٹی سوالات کی درست تصدیق لازمی ہے۔
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h2 className="text-xs font-bold theme-text-main leading-tight">
-                        Executive Administration
-                      </h2>
-                      <span className="text-[10px] theme-text-secondary leading-none">
-                        Master Director Controls
-                      </span>
-                    </div>
+
+                    {securityVerified ? (
+                      <div className="py-8 text-center space-y-3 animate-in fade-in">
+                        <div className="w-16 h-16 mx-auto rounded-full bg-emerald-500/20 border-2 border-emerald-500 text-emerald-600 dark:text-emerald-400 flex items-center justify-center animate-bounce">
+                          <Check className="w-8 h-8 stroke-[3]" />
+                        </div>
+                        <h4 className="text-base font-bold theme-text-main font-brand">
+                          سیکیورٹی ٹیسٹ کامیاب!
+                        </h4>
+                        <p className="text-xs text-emerald-700 dark:text-emerald-400 font-semibold">
+                          Security Verification Passed · Opening Executive Admin Vault...
+                        </p>
+                      </div>
+                    ) : (
+                      <form onSubmit={handleSecurityChallengeSubmit} className="space-y-4">
+                        {/* Question 1: Master Secret PIN */}
+                        <div>
+                          <label className="block text-xs font-bold theme-text-secondary mb-1 flex items-center justify-between">
+                            <span>1. ڈائریکٹر خفیہ سیکیورٹی پن (Master PIN) *</span>
+                            <span className="text-[10px] font-mono font-bold text-amber-700 dark:text-amber-400 px-1.5 py-0.5 rounded bg-amber-500/10">
+                              4 Digits
+                            </span>
+                          </label>
+                          <div className="relative">
+                            <input
+                              type="password"
+                              maxLength={8}
+                              value={adminSecurityPin}
+                              onChange={(e) => setAdminSecurityPin(e.target.value)}
+                              placeholder="4-digit Master Security Key"
+                              required
+                              autoFocus
+                              className="w-full px-3.5 py-2.5 theme-bg-subtle border theme-border rounded-xl theme-text-main placeholder:text-stone-400 text-sm font-mono tracking-widest focus:outline-none focus:border-amber-500 transition"
+                            />
+                          </div>
+                          <span className="text-[10px] theme-text-tertiary mt-1 block">
+                            (ڈیفالٹ ماسٹر کوڈ: 5978 یا 2026)
+                          </span>
+                        </div>
+
+                        {/* Question 2: Official Registered Contact / WhatsApp / Email */}
+                        <div>
+                          <label className="block text-xs font-bold theme-text-secondary mb-1">
+                            2. رجسٹرڈ ڈائریکٹر واٹس ایپ یا ای میل ایڈریس *
+                          </label>
+                          <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none theme-text-tertiary">
+                              <Mail className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                            </div>
+                            <input
+                              type="text"
+                              value={securityAnswer1}
+                              onChange={(e) => setSecurityAnswer1(e.target.value)}
+                              placeholder="مثلاً: sacc5038@gmail.com یا 0308-2665978"
+                              required
+                              className="w-full pl-9 pr-3.5 py-2.5 theme-bg-subtle border theme-border rounded-xl theme-text-main placeholder:text-stone-400 text-xs sm:text-sm focus:outline-none focus:border-amber-500 transition"
+                            />
+                          </div>
+                          <span className="text-[10px] theme-text-tertiary mt-1 block">
+                            What is your registered Director Email or WhatsApp number?
+                          </span>
+                        </div>
+
+                        {/* Question 3: Registered City or Headquarters Brand */}
+                        <div>
+                          <label className="block text-xs font-bold theme-text-secondary mb-1">
+                            3. کمپنی کا رجسٹرڈ ہیڈکوارٹر شہر یا برانڈ نام *
+                          </label>
+                          <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none theme-text-tertiary">
+                              <Building className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                            </div>
+                            <input
+                              type="text"
+                              value={securityAnswer2}
+                              onChange={(e) => setSecurityAnswer2(e.target.value)}
+                              placeholder="مثلاً: Lahore یا CM INVENTORY VAULT"
+                              required
+                              className="w-full pl-9 pr-3.5 py-2.5 theme-bg-subtle border theme-border rounded-xl theme-text-main placeholder:text-stone-400 text-xs sm:text-sm focus:outline-none focus:border-amber-500 transition"
+                            />
+                          </div>
+                          <span className="text-[10px] theme-text-tertiary mt-1 block">
+                            What is your registered City or Agency Brand Name?
+                          </span>
+                        </div>
+
+                        {/* Question 4: Dynamic Math / Anti-Bot Challenge */}
+                        <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20">
+                          <label className="block text-xs font-bold text-amber-900 dark:text-amber-200 mb-1.5 flex items-center justify-between">
+                            <span className="flex items-center gap-1.5">
+                              <Sparkles className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                              <span>4. حسابی سیکیورٹی سوال (Anti-Bot Math Test) *</span>
+                            </span>
+                            <button
+                              type="button"
+                              onClick={refreshMathChallenge}
+                              className="text-[11px] text-amber-700 dark:text-amber-400 hover:underline flex items-center gap-1 font-normal"
+                              title="نیا سوال جنریٹ کریں"
+                            >
+                              <RefreshCw className="w-3 h-3" />
+                              <span>نیا سوال</span>
+                            </button>
+                          </label>
+                          <div className="flex items-center gap-3">
+                            <div className="px-3 py-2 rounded-xl bg-amber-500/20 border border-amber-500/40 font-mono font-bold text-sm text-amber-900 dark:text-amber-200 shrink-0 select-none">
+                              {mathProblem.num1} + {mathProblem.num2} = ?
+                            </div>
+                            <input
+                              type="number"
+                              value={mathAnswer}
+                              onChange={(e) => setMathAnswer(e.target.value)}
+                              placeholder="مجموعہ درج کریں"
+                              required
+                              className="w-full px-3 py-2 theme-bg-card border theme-border rounded-xl theme-text-main text-sm font-mono font-bold focus:outline-none focus:border-amber-500"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Security Hint Toggle Button */}
+                        <div className="pt-1">
+                          <button
+                            type="button"
+                            onClick={() => setShowSecurityHint(!showSecurityHint)}
+                            className="text-xs text-amber-700 dark:text-amber-400 hover:underline flex items-center gap-1 font-semibold"
+                          >
+                            <HelpCircle className="w-3.5 h-3.5" />
+                            <span>{showSecurityHint ? 'سیکیورٹی مدد چھپائیں' : 'ڈائریکٹر سیکیورٹی ہنٹ (Hint)?'}</span>
+                          </button>
+
+                          {showSecurityHint && (
+                            <div className="mt-2 p-3 rounded-xl bg-amber-100/70 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800 text-[11px] text-amber-900 dark:text-amber-200 space-y-1 animate-in fade-in">
+                              <p className="font-bold">💡 ڈائریکٹر سیکیورٹی ریکارڈ ہنٹ:</p>
+                              <p>• ماسٹر پن: <strong>5978</strong> (یا 2026)</p>
+                              <p>• رابطہ: <strong>sacc5038@gmail.com</strong> یا <strong>0308-2665978</strong></p>
+                              <p>• بنیادی شہر: <strong>Lahore</strong> / برانڈ: <strong>CM INVENTORY VAULT</strong></p>
+                            </div>
+                          )}
+                        </div>
+
+                        {securityError && (
+                          <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-800 text-xs text-rose-700 dark:text-rose-300 font-medium flex items-start gap-2 animate-in fade-in">
+                            <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-rose-600" />
+                            <span>{securityError}</span>
+                          </div>
+                        )}
+
+                        <div className="pt-2 flex items-center gap-3">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setPendingAdminSession(null);
+                              setSecurityError('');
+                              setSecurityVerified(false);
+                            }}
+                            className="flex-1 py-2.5 rounded-xl theme-bg-subtle border theme-border text-xs font-semibold theme-text-main hover:bg-black/5 dark:hover:bg-white/5 transition"
+                          >
+                            منسوخ کریں (Cancel)
+                          </button>
+
+                          <button
+                            type="submit"
+                            disabled={isLoading}
+                            className="flex-1 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition shadow-md shadow-amber-600/20 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-1.5 min-h-[42px]"
+                          >
+                            {isLoading ? (
+                              <span>تصدیق ہو رہی ہے...</span>
+                            ) : (
+                              <>
+                                <ShieldCheck className="w-4 h-4" />
+                                <span>تصدیق اور ایڈمن پینل ان لاک</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      </form>
+                    )}
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setActiveTab('login');
-                      setErrorMsg('');
-                      setSuccessMsg('');
-                    }}
-                    className="text-xs font-semibold theme-text-secondary hover:theme-text-main transition px-2 py-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/5"
-                  >
-                    &larr; Back to Portal
-                  </button>
-                </div>
-              ) : (
-                /* Standard Public 2-Way Tabs: Create Account / Sign In */
-                <div className="grid grid-cols-2 gap-1 p-1 theme-bg-subtle rounded-xl mb-5 border theme-border text-center">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setActiveTab('create_account');
-                      setErrorMsg('');
-                      setSuccessMsg('');
-                      setPendingApprovalData(null);
-                    }}
-                    className={`py-2 px-2 text-xs font-bold rounded-lg transition ${
-                      activeTab === 'create_account'
-                        ? 'bg-amber-600 text-white shadow-xs'
-                        : 'theme-text-secondary hover:theme-text-main'
-                    }`}
-                  >
-                    Create Account
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setActiveTab('login');
-                      setErrorMsg('');
-                      setSuccessMsg('');
-                      setPendingApprovalData(null);
-                    }}
-                    className={`py-2 px-2 text-xs font-bold rounded-lg transition ${
-                      activeTab === 'login'
-                        ? 'bg-amber-600 text-white shadow-xs'
-                        : 'theme-text-secondary hover:theme-text-main'
-                    }`}
-                  >
-                    User Sign In
-                  </button>
                 </div>
               )}
 
+              {/* Standard Public 2-Way Tabs: Sign In / Create Account (NO Admin Tab!) */}
+              <div className="grid grid-cols-2 gap-1 p-1 theme-bg-subtle rounded-xl mb-5 border theme-border text-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab('login');
+                    setErrorMsg('');
+                    setSuccessMsg('');
+                    setPendingApprovalData(null);
+                  }}
+                  className={`py-2 px-2 text-xs font-bold rounded-lg transition ${
+                    activeTab === 'login'
+                      ? 'bg-amber-600 text-white shadow-xs'
+                      : 'theme-text-secondary hover:theme-text-main'
+                  }`}
+                >
+                  Sign In (لاگ ان)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab('create_account');
+                    setErrorMsg('');
+                    setSuccessMsg('');
+                    setPendingApprovalData(null);
+                  }}
+                  className={`py-2 px-2 text-xs font-bold rounded-lg transition ${
+                    activeTab === 'create_account'
+                      ? 'bg-amber-600 text-white shadow-xs'
+                      : 'theme-text-secondary hover:theme-text-main'
+                  }`}
+                >
+                  Create Account (نیا اکاؤنٹ)
+                </button>
+              </div>
+
               <div className="mb-4">
                 <h1 className="text-lg sm:text-xl font-bold theme-text-main tracking-tight font-brand">
-                  {activeTab === 'admin' 
-                    ? 'Executive Administration Portal' 
-                    : activeTab === 'login' 
-                    ? 'User Portal Sign In' 
-                    : 'Create Free Account'}
+                  {activeTab === 'login' ? 'Property Hub Sign In' : 'Create Free Account'}
                 </h1>
                 <p className="text-xs theme-text-secondary mt-0.5">
-                  {activeTab === 'admin'
-                    ? 'Restricted Master Director access for User Account Controls & Approvals'
-                    : activeTab === 'login' 
-                    ? 'Enter your credentials to manage your property listings' 
+                  {activeTab === 'login' 
+                    ? 'Enter your Employee ID or Username to access properties' 
                     : 'Instant registration — fill the details below to start using the portal immediately'}
                 </p>
               </div>
@@ -493,7 +747,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, isOnline }
                       href={`mailto:${pendingApprovalData.owner_email}?subject=${encodeURIComponent('Account Activation Request: ' + username)}`}
                       className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl theme-bg-card border theme-border font-semibold text-xs theme-text-main transition"
                     >
-                      <Mail className="w-3.5 h-3.5 text-sky-700 dark:text-sky-400" />
+                      <Mail className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" />
                       <span>Email Administration Support</span>
                     </a>
                   </div>
@@ -513,79 +767,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, isOnline }
                 </div>
               )}
 
-              {/* TAB 1: EXECUTIVE ADMIN LOGIN */}
-              {activeTab === 'admin' && (
-                <form onSubmit={handleAdminLoginSubmit} className="space-y-3.5 animate-in fade-in">
-                  <div className="p-3 rounded-xl bg-sky-500/10 border border-sky-500/30 text-xs text-sky-900 dark:text-sky-200 flex items-center gap-2">
-                    <ShieldCheck className="w-4 h-4 text-sky-600 dark:text-sky-400 shrink-0" />
-                    <span className="font-semibold">Master Administrator Sign In</span>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold theme-text-secondary mb-1">
-                      Administrator Username
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none theme-text-tertiary">
-                        <UserIcon className="w-4 h-4" />
-                      </div>
-                      <input
-                        type="text"
-                        value={adminUsername}
-                        onChange={(e) => setAdminUsername(e.target.value)}
-                        placeholder="Administrator Username"
-                        required
-                        autoComplete="off"
-                        className="w-full pl-10 pr-4 py-2.5 theme-bg-subtle border theme-border rounded-xl theme-text-main placeholder:text-stone-400 text-sm focus:outline-none focus:border-sky-500 transition"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold theme-text-secondary mb-1">
-                      Master Administrator Password
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none theme-text-tertiary">
-                        <Lock className="w-4 h-4" />
-                      </div>
-                      <input
-                        type={showAdminPassword ? 'text' : 'password'}
-                        value={adminPassword}
-                        onChange={(e) => setAdminPassword(e.target.value)}
-                        placeholder="Administrator Password"
-                        required
-                        autoComplete="off"
-                        className="w-full pl-10 pr-11 py-2.5 theme-bg-subtle border theme-border rounded-xl theme-text-main placeholder:text-stone-400 text-sm focus:outline-none focus:border-sky-500 transition"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowAdminPassword(!showAdminPassword)}
-                        className="absolute inset-y-0 right-0 pr-3.5 flex items-center theme-text-tertiary hover:theme-text-main"
-                      >
-                        {showAdminPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                    </div>
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full mt-2 py-3 px-4 rounded-xl bg-sky-600 hover:bg-sky-700 dark:bg-sky-500 dark:hover:bg-sky-600 text-white font-bold text-sm tracking-wide transition-all shadow-md shadow-sky-600/20 active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 min-h-[44px]"
-                  >
-                    {isLoading ? (
-                      <span>Authenticating Admin...</span>
-                    ) : (
-                      <>
-                        <ShieldCheck className="w-4 h-4" />
-                        <span>Sign In as Administrator</span>
-                      </>
-                    )}
-                  </button>
-                </form>
-              )}
-
-              {/* TAB 2: NORMAL USER SIGN IN */}
+              {/* SINGLE CLEAN USER SIGN IN FORM (Used by both Employees and Admin) */}
               {activeTab === 'login' && (
                 <form onSubmit={handleLoginSubmit} className="space-y-3.5 animate-in fade-in">
                   <div>
@@ -600,9 +782,9 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, isOnline }
                         type="text"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
-                        placeholder="Enter your Username or ID"
+                        placeholder="Enter Username or Employee ID"
                         required
-                        className="w-full pl-10 pr-4 py-2.5 theme-bg-subtle border theme-border rounded-xl theme-text-main placeholder:text-stone-400 text-sm focus:outline-none focus:border-sky-500 transition"
+                        className="w-full pl-10 pr-4 py-2.5 theme-bg-subtle border theme-border rounded-xl theme-text-main placeholder:text-stone-400 text-sm focus:outline-none focus:border-amber-500 transition"
                       />
                     </div>
                   </div>
@@ -621,7 +803,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, isOnline }
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="Enter password"
                         required
-                        className="w-full pl-10 pr-11 py-2.5 theme-bg-subtle border theme-border rounded-xl theme-text-main placeholder:text-stone-400 text-sm focus:outline-none focus:border-sky-500 transition"
+                        className="w-full pl-10 pr-11 py-2.5 theme-bg-subtle border theme-border rounded-xl theme-text-main placeholder:text-stone-400 text-sm focus:outline-none focus:border-amber-500 transition"
                       />
                       <button
                         type="button"
@@ -642,7 +824,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, isOnline }
                       <span>Signing in...</span>
                     ) : (
                       <>
-                        <span>Sign In to Dashboard</span>
+                        <span>Sign In to Portal</span>
                         <ArrowRight className="w-4 h-4" />
                       </>
                     )}
@@ -667,7 +849,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, isOnline }
                         onChange={(e) => setReqFullName(e.target.value)}
                         placeholder="e.g. Tariq Mehmood"
                         required
-                        className="w-full pl-9 pr-3 py-2 theme-bg-subtle border theme-border rounded-xl theme-text-main placeholder:text-stone-400 text-sm focus:outline-none focus:border-sky-500 transition"
+                        className="w-full pl-9 pr-3 py-2 theme-bg-subtle border theme-border rounded-xl theme-text-main placeholder:text-stone-400 text-sm focus:outline-none focus:border-amber-500 transition"
                       />
                     </div>
                   </div>
@@ -687,7 +869,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, isOnline }
                           onChange={(e) => setReqPhone(e.target.value)}
                           placeholder="0300-1234567"
                           required
-                          className="w-full pl-9 pr-3 py-2 theme-bg-subtle border theme-border rounded-xl theme-text-main placeholder:text-stone-400 text-sm focus:outline-none focus:border-sky-500 transition"
+                          className="w-full pl-9 pr-3 py-2 theme-bg-subtle border theme-border rounded-xl theme-text-main placeholder:text-stone-400 text-sm focus:outline-none focus:border-amber-500 transition"
                         />
                       </div>
                     </div>
@@ -706,7 +888,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, isOnline }
                           onChange={(e) => setReqEmail(e.target.value)}
                           placeholder="name@email.com"
                           required
-                          className="w-full pl-9 pr-3 py-2 theme-bg-subtle border theme-border rounded-xl theme-text-main placeholder:text-stone-400 text-sm focus:outline-none focus:border-sky-500 transition"
+                          className="w-full pl-9 pr-3 py-2 theme-bg-subtle border theme-border rounded-xl theme-text-main placeholder:text-stone-400 text-sm focus:outline-none focus:border-amber-500 transition"
                         />
                       </div>
                     </div>
@@ -726,7 +908,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, isOnline }
                           value={reqAgency}
                           onChange={(e) => setReqAgency(e.target.value)}
                           placeholder="e.g. Real Estate Agency"
-                          className="w-full pl-9 pr-3 py-2 theme-bg-subtle border theme-border rounded-xl theme-text-main placeholder:text-stone-400 text-sm focus:outline-none focus:border-sky-500 transition"
+                          className="w-full pl-9 pr-3 py-2 theme-bg-subtle border theme-border rounded-xl theme-text-main placeholder:text-stone-400 text-sm focus:outline-none focus:border-amber-500 transition"
                         />
                       </div>
                     </div>
@@ -740,7 +922,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, isOnline }
                         value={reqCity}
                         onChange={(e) => setReqCity(e.target.value)}
                         placeholder="Lahore"
-                        className="w-full px-3 py-2 theme-bg-subtle border theme-border rounded-xl theme-text-main placeholder:text-stone-400 text-sm focus:outline-none focus:border-sky-500 transition"
+                        className="w-full px-3 py-2 theme-bg-subtle border theme-border rounded-xl theme-text-main placeholder:text-stone-400 text-sm focus:outline-none focus:border-amber-500 transition"
                       />
                     </div>
                   </div>
@@ -755,7 +937,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, isOnline }
                       onChange={(e) => setReqUsername(e.target.value)}
                       placeholder="e.g. EMP-105 or yourname"
                       required
-                      className="w-full px-3 py-2 theme-bg-subtle border theme-border rounded-xl theme-text-main placeholder:text-stone-400 text-sm focus:outline-none focus:border-sky-500 transition"
+                      className="w-full px-3 py-2 theme-bg-subtle border theme-border rounded-xl theme-text-main placeholder:text-stone-400 text-sm focus:outline-none focus:border-amber-500 transition"
                     />
                   </div>
 
@@ -771,7 +953,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, isOnline }
                           onChange={(e) => setReqPassword(e.target.value)}
                           placeholder="Min 6 characters"
                           required
-                          className="w-full pl-3 pr-8 py-2 theme-bg-subtle border theme-border rounded-xl theme-text-main placeholder:text-stone-400 text-sm focus:outline-none focus:border-sky-500 transition"
+                          className="w-full pl-3 pr-8 py-2 theme-bg-subtle border theme-border rounded-xl theme-text-main placeholder:text-stone-400 text-sm focus:outline-none focus:border-amber-500 transition"
                         />
                         <button
                           type="button"
@@ -793,7 +975,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, isOnline }
                         onChange={(e) => setReqConfirmPassword(e.target.value)}
                         placeholder="Re-enter password"
                         required
-                        className="w-full px-3 py-2 theme-bg-subtle border theme-border rounded-xl theme-text-main placeholder:text-stone-400 text-sm focus:outline-none focus:border-sky-500 transition"
+                        className="w-full px-3 py-2 theme-bg-subtle border theme-border rounded-xl theme-text-main placeholder:text-stone-400 text-sm focus:outline-none focus:border-amber-500 transition"
                       />
                     </div>
                   </div>
@@ -818,22 +1000,9 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, isOnline }
           )}
         </div>
 
-        {/* Security & Privacy notice with tiny subtle corner admin entrance */}
+        {/* Clean footer notice without any hidden buttons */}
         <div className="mt-4 flex items-center justify-center gap-1.5 text-[11px] sm:text-xs theme-text-tertiary font-medium">
           <span>CM INVENTORY VAULT · Real Estate Property Management System</span>
-          <button
-            type="button"
-            onClick={() => {
-              setActiveTab(activeTab === 'admin' ? 'login' : 'admin');
-              setErrorMsg('');
-              setSuccessMsg('');
-            }}
-            className="opacity-15 hover:opacity-75 transition p-0.5 text-stone-400 hover:text-amber-600 focus:outline-none"
-            title="System"
-            aria-label="Security"
-          >
-            <ShieldCheck className="w-3 h-3" />
-          </button>
         </div>
       </div>
     </div>

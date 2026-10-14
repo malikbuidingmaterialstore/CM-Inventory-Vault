@@ -339,15 +339,15 @@ export const MyAccountView: React.FC<MyAccountViewProps> = ({
         </div>
       </div>
 
-      {/* Owner Console link (only visible if logged-in user is explicitly Owner) */}
+      {/* Owner Console link (only visible if logged-in user is explicitly verified Owner) */}
       {user.role === 'owner' && (
         <div className="pt-4 border-t theme-border text-center">
           <button
             onClick={onOpenOwnerControl}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-sky-100 dark:bg-sky-950/40 hover:bg-sky-200 dark:hover:bg-sky-900/50 text-sky-900 dark:text-sky-300 border border-sky-300 dark:border-sky-700 text-xs font-semibold transition"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-900 dark:text-amber-300 border border-amber-500/30 text-xs font-bold transition shadow-xs active:scale-95"
           >
-            <ShieldCheck className="w-4 h-4 text-sky-600 dark:text-sky-400" />
-            <span>Open Executive Administration Console</span>
+            <ShieldCheck className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+            <span>Open Executive Administration Console (Admin Vault)</span>
           </button>
         </div>
       )}

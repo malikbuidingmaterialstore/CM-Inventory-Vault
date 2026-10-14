@@ -366,6 +366,8 @@ export default function App() {
             isOnline={isOnline}
             sponsorAds={sponsorAds}
             adsEnabled={adsEnabled}
+            googleAdClient={settings?.google_ad_client}
+            googleAdSlot={settings?.google_ad_slot}
             onOpenUpgradeModal={() => setIsUpgradeModalOpen(true)}
             onNavigate={(view) => {
               if (view === 'add_property') setEditingProperty(null);
@@ -511,7 +513,7 @@ export default function App() {
           />
         )}
 
-        {currentView === 'owner_control' && (
+        {currentView === 'owner_control' && session.user.role === 'owner' && (
           <OwnerControlView
             currentUser={session.user}
             onExit={() => setCurrentView('dashboard')}

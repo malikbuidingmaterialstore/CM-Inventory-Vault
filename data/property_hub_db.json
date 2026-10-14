@@ -8,7 +8,7 @@
       "role": "owner",
       "is_active": true,
       "created_at": "2026-01-01T00:00:00.000Z",
-      "last_login_at": "2026-10-10T10:45:35.800Z",
+      "last_login_at": "2026-10-14T08:00:58.386Z",
       "subscription_tier": "pro",
       "is_ad_free": true
     },
@@ -64,10 +64,85 @@
       "token": "phtk_f84d332eaa70904a0a369e9fd3cd3682aa5282486d45787d545fb2b9fe77f5ad",
       "expires_at": "2026-11-09T10:40:44.643Z",
       "created_at": "2026-10-10T10:40:44.643Z"
+    },
+    {
+      "session_id": "sess_cf44e3c300c581df76185d0e30256bb3",
+      "user_id": "usr_owner",
+      "token": "phtk_a41b547c929a2cf70fa82be6ac8a7d20c7e5875dd12360e7f727c41e9c4e4e83",
+      "expires_at": "2026-11-13T07:38:52.648Z",
+      "created_at": "2026-10-14T07:38:52.649Z"
+    },
+    {
+      "session_id": "sess_330a17c4902e5c02564b5502d83d6910",
+      "user_id": "usr_owner",
+      "token": "phtk_6524ebec32d655f0a79bcc54cbfcc2a88b2e4d701559fbcf7cc39b7222f7bda7",
+      "expires_at": "2026-11-13T07:38:58.783Z",
+      "created_at": "2026-10-14T07:38:58.783Z"
+    },
+    {
+      "session_id": "sess_9e12a76e8ef8d239cf1a1601d04c8d3f",
+      "user_id": "usr_owner",
+      "token": "phtk_81e19dcff3eee48718e97766da57735b12a7726d2c776d125932069ce5d51dbb",
+      "expires_at": "2026-11-13T07:39:03.782Z",
+      "created_at": "2026-10-14T07:39:03.782Z"
+    },
+    {
+      "session_id": "sess_f203e5be7f48d7a810f992ec4fec4ebb",
+      "user_id": "usr_owner",
+      "token": "phtk_68f015dfdeaf0f9e4160c947c8a15b3bab1fce8573a3087783df1e40fdda1574",
+      "expires_at": "2026-11-13T08:00:54.109Z",
+      "created_at": "2026-10-14T08:00:54.109Z"
+    },
+    {
+      "session_id": "sess_d14dd1b0784983afba95ee5f061a19e4",
+      "user_id": "usr_owner",
+      "token": "phtk_e5e652ee4d1bd0052221d4a90a4966584218f8300bfd7daa9e92242d6dfcb85b",
+      "expires_at": "2026-11-13T08:00:58.387Z",
+      "created_at": "2026-10-14T08:00:58.387Z"
     }
   ],
   "properties": [],
   "activity_logs": [
+    {
+      "log_id": "log_1791964858387_ugg2",
+      "user_id": "usr_owner",
+      "username": "owner",
+      "action": "LOGIN",
+      "details": "Successful login",
+      "timestamp": "2026-10-14T08:00:58.387Z"
+    },
+    {
+      "log_id": "log_1791964854109_63eh",
+      "user_id": "usr_owner",
+      "username": "owner",
+      "action": "LOGIN",
+      "details": "Successful login",
+      "timestamp": "2026-10-14T08:00:54.109Z"
+    },
+    {
+      "log_id": "log_1791963543783_w2v3",
+      "user_id": "usr_owner",
+      "username": "owner",
+      "action": "LOGIN",
+      "details": "Successful login",
+      "timestamp": "2026-10-14T07:39:03.783Z"
+    },
+    {
+      "log_id": "log_1791963538784_f7pe",
+      "user_id": "usr_owner",
+      "username": "owner",
+      "action": "LOGIN",
+      "details": "Successful login",
+      "timestamp": "2026-10-14T07:38:58.784Z"
+    },
+    {
+      "log_id": "log_1791963532649_ywea",
+      "user_id": "usr_owner",
+      "username": "owner",
+      "action": "LOGIN",
+      "details": "Successful login",
+      "timestamp": "2026-10-14T07:38:52.649Z"
+    },
     {
       "log_id": "log_1791629135802_4gw8",
       "user_id": "usr_owner",
