@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.cminventorywallet.app",
+      "sha256_cert_fingerprints": [
+        "14:6D:E9:EB:AB:52:16:FE:84:3F:8E:73:70:C6:A9:74:1F:B4:74:0D:44:A2:4E:94:FB:46:16:32:8B:A0:F3:A8"
+      ]
+    }
+  }
+]
