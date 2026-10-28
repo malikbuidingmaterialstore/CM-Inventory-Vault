@@ -34,7 +34,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
               setIconSrc('/logo-icon.png');
             }
           }}
-          alt="CM INVENTORY VAULT"
+          alt="CM INVENTORY WALLET"
           referrerPolicy="no-referrer"
           className={`${sizeMap.iconSize} object-contain bg-transparent drop-shadow-[0_2px_8px_rgba(212,175,55,0.4)]`}
         />
@@ -45,8 +45,8 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
   return (
     <div className={`flex flex-col items-center justify-center select-none bg-transparent ${className}`}>
       {/* 
-        Official CM INVENTORY VAULT Brand Logo with Pure Transparent Background
-        Features the 3D Gold 'C' and 3D Black 'M' Emblem, House Roof, Clipboard, and 'INVENTORY VAULT'
+        Official CM INVENTORY WALLET Brand Logo with Pure Transparent Background
+        Features the 3D Gold 'C' and 3D Black 'M' Emblem, House Roof, Clipboard, and 'INVENTORY WALLET'
       */}
       <div className={`relative ${sizeMap.width} w-full flex items-center justify-center bg-transparent`}>
         <img
@@ -56,7 +56,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
               setLogoSrc('/logo.png');
             }
           }}
-          alt="CM INVENTORY VAULT"
+          alt="CM INVENTORY WALLET"
           referrerPolicy="no-referrer"
           className="w-full h-auto object-contain bg-transparent filter drop-shadow-[0_4px_16px_rgba(212,175,55,0.3)]"
         />

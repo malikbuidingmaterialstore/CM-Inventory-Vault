@@ -285,6 +285,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, isOnline }
       ans2.includes('lahore') || 
       ans2.includes('لاہور') || 
       ans2.includes('cm') || 
+      ans2.includes('wallet') || 
       ans2.includes('vault') || 
       ans2.includes('inventory') || 
       ans2.includes('property hub') || 
@@ -293,7 +294,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, isOnline }
       (pendingAdminSession.user.city && ans2.includes(pendingAdminSession.user.city.toLowerCase()));
 
     if (!isAns2Valid) {
-      setSecurityError('سیکیورٹی سوال 2: بنیادی شہر یا برانڈ کا نام ریکارڈ سے میچ نہیں ہوا۔ (ہنٹ: Lahore یا CM INVENTORY VAULT)');
+      setSecurityError('سیکیورٹی سوال 2: بنیادی شہر یا برانڈ کا نام ریکارڈ سے میچ نہیں ہوا۔ (ہنٹ: Lahore یا CM INVENTORY WALLET)');
       return;
     }
 
@@ -472,7 +473,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, isOnline }
                           </h3>
                         </div>
                         <p className="text-[11px] font-semibold text-amber-700 dark:text-amber-300 mt-0.5">
-                          Executive Multi-Factor Security Challenge · Admin Vault Access Gate
+                          Executive Multi-Factor Security Challenge · Admin Wallet Access Gate
                         </p>
                         <p className="text-[11px] theme-text-tertiary mt-1 leading-relaxed">
                           ایڈمن پینل مکمل طور پر خفیہ ہے۔ پینل کھولنے کے لیے درج ذیل سیکیورٹی سوالات کی درست تصدیق لازمی ہے۔
@@ -489,7 +490,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, isOnline }
                           سیکیورٹی ٹیسٹ کامیاب!
                         </h4>
                         <p className="text-xs text-emerald-700 dark:text-emerald-400 font-semibold">
-                          Security Verification Passed · Opening Executive Admin Vault...
+                          Security Verification Passed · Opening Executive Admin Wallet...
                         </p>
                       </div>
                     ) : (
@@ -555,7 +556,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, isOnline }
                               type="text"
                               value={securityAnswer2}
                               onChange={(e) => setSecurityAnswer2(e.target.value)}
-                              placeholder="مثلاً: Lahore یا CM INVENTORY VAULT"
+                              placeholder="مثلاً: Lahore یا CM INVENTORY WALLET"
                               required
                               className="w-full pl-9 pr-3.5 py-2.5 theme-bg-subtle border theme-border rounded-xl theme-text-main placeholder:text-stone-400 text-xs sm:text-sm focus:outline-none focus:border-amber-500 transition"
                             />
@@ -613,7 +614,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, isOnline }
                               <p className="font-bold">💡 ڈائریکٹر سیکیورٹی ریکارڈ ہنٹ:</p>
                               <p>• ماسٹر پن: <strong>5978</strong> (یا 2026)</p>
                               <p>• رابطہ: <strong>sacc5038@gmail.com</strong> یا <strong>0308-2665978</strong></p>
-                              <p>• بنیادی شہر: <strong>Lahore</strong> / برانڈ: <strong>CM INVENTORY VAULT</strong></p>
+                              <p>• بنیادی شہر: <strong>Lahore</strong> / برانڈ: <strong>CM INVENTORY WALLET</strong></p>
                             </div>
                           )}
                         </div>
@@ -1002,7 +1003,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, isOnline }
 
         {/* Clean footer notice without any hidden buttons */}
         <div className="mt-4 flex items-center justify-center gap-1.5 text-[11px] sm:text-xs theme-text-tertiary font-medium">
-          <span>CM INVENTORY VAULT · Real Estate Property Management System</span>
+          <span>CM INVENTORY WALLET · Real Estate Property Management System</span>
         </div>
       </div>
     </div>

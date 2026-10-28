@@ -1,0 +1,12 @@
+{
+  "appId": "com.cminventorywallet.app",
+  "appName": "CM INVENTORY WALLET",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "backgroundColor": "#14171D",
+  "android": {
+    "backgroundColor": "#14171D",
+    "allowMixedContent": true,
+    "captureInput": true
+  }
+}

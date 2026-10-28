@@ -57,7 +57,7 @@ export const TopBar: React.FC<TopBarProps> = ({
         >
           <img
             src="/logo.png"
-            alt="CM INVENTORY VAULT"
+            alt="CM INVENTORY WALLET"
             className="h-8 sm:h-10 w-auto max-w-[170px] sm:max-w-[220px] object-contain filter drop-shadow-[0_2px_8px_rgba(212,175,55,0.35)]"
           />
         </button>
@@ -242,10 +242,10 @@ export const TopBar: React.FC<TopBarProps> = ({
                     ? 'bg-amber-600 text-white shadow-xs'
                     : 'bg-amber-500/15 hover:bg-amber-500/25 text-amber-800 dark:text-amber-300 border border-amber-500/30'
                 }`}
-                title={currentView === 'owner_control' ? 'Exit Admin Vault' : 'Open Admin Vault'}
+                title={currentView === 'owner_control' ? 'Exit Admin Wallet' : 'Open Admin Wallet'}
               >
                 <ShieldCheck className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-                <span className="hidden sm:inline">Admin Vault</span>
+                <span className="hidden sm:inline">Admin Wallet</span>
               </button>
             )}
 

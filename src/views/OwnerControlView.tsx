@@ -792,7 +792,7 @@ export const OwnerControlView: React.FC<OwnerControlViewProps> = ({
                   const isApproved = req.status === 'approved';
                   const cleanPhone = req.phone.replace(/[^0-9]/g, '');
                   const waText = encodeURIComponent(
-                    `Hello ${req.full_name}! I am the Administration of CM INVENTORY VAULT. I received your account access request for username "${req.desired_username}". Let's finalize your activation.`
+                    `Hello ${req.full_name}! I am the Administration of CM INVENTORY WALLET. I received your account access request for username "${req.desired_username}". Let's finalize your activation.`
                   );
                   const waUrl = `https://wa.me/${cleanPhone}?text=${waText}`;
 
@@ -842,7 +842,7 @@ export const OwnerControlView: React.FC<OwnerControlViewProps> = ({
                           </a>
 
                           <a
-                            href={`mailto:${req.email}?subject=${encodeURIComponent('CM INVENTORY VAULT Portal Access - Activation Details')}`}
+                            href={`mailto:${req.email}?subject=${encodeURIComponent('CM INVENTORY WALLET Portal Access - Activation Details')}`}
                             className="flex items-center gap-1 hover:underline truncate"
                           >
                             <Mail className="w-3.5 h-3.5 theme-text-tertiary" />

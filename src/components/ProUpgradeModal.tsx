@@ -53,7 +53,7 @@ export const ProUpgradeModal: React.FC<ProUpgradeModalProps> = ({
           cached.user = res.user;
           await saveSessionLocally(cached);
         }
-        setSuccessMessage('Congratulations! Your account has been upgraded to CM Vault Pro (Ad-Free Active).');
+        setSuccessMessage('Congratulations! Your account has been upgraded to CM Wallet Pro (Ad-Free Active).');
         setTimeout(() => {
           onUpgradeSuccess(res.user);
           onClose();
@@ -68,7 +68,7 @@ export const ProUpgradeModal: React.FC<ProUpgradeModalProps> = ({
   };
 
   const whatsappMessage = encodeURIComponent(
-    `Hello Owner / Administration,\n\nI want to upgrade my CM INVENTORY VAULT account to the Ad-Free PRO Version.\n\n👤 Username: ${user.username}\n💼 Name: ${user.full_name}\n📱 Phone: ${user.phone || 'N/A'}\n\nPlease activate my Ad-Free PRO subscription.`
+    `Hello Owner / Administration,\n\nI want to upgrade my CM INVENTORY WALLET account to the Ad-Free PRO Version.\n\n👤 Username: ${user.username}\n💼 Name: ${user.full_name}\n📱 Phone: ${user.phone || 'N/A'}\n\nPlease activate my Ad-Free PRO subscription.`
   );
 
   return (
@@ -100,7 +100,7 @@ export const ProUpgradeModal: React.FC<ProUpgradeModalProps> = ({
           </div>
 
           <h2 className="text-xl sm:text-2xl font-black tracking-tight font-brand">
-            CM Vault Pro — Ad-Free Version
+            CM Wallet Pro — Ad-Free Version
           </h2>
           <p className="text-xs text-sky-200 mt-1 leading-relaxed">
             Eliminate all advertisements and unlock verified premium realtor features.

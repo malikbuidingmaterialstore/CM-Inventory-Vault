@@ -208,7 +208,7 @@ export const SponsorAdBanner: React.FC<SponsorAdBannerProps> = ({
         <button
           onClick={onOpenUpgradeModal}
           className="group inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-400/40 text-[11px] font-bold transition active:scale-95 shadow-xs"
-          title="Upgrade to CM Vault Pro to permanently remove all advertisements"
+          title="Upgrade to CM Wallet Pro to permanently remove all advertisements"
         >
           <Crown className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 group-hover:rotate-12 transition-transform" />
           <span>Remove Ads (Ad-Free PRO)</span>

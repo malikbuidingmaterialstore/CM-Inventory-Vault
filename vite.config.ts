@@ -23,9 +23,9 @@ export default defineConfig(() => {
         ],
         manifest: {
           id: '/',
-          name: 'CM INVENTORY VAULT',
-          short_name: 'CM VAULT',
-          description: 'CM INVENTORY VAULT — Enterprise Real Estate Property Management System',
+          name: 'CM INVENTORY WALLET',
+          short_name: 'CM WALLET',
+          description: 'CM INVENTORY WALLET — Enterprise Real Estate Property Management System',
           theme_color: '#14171D',
           background_color: '#0D0F12',
           display: 'standalone',

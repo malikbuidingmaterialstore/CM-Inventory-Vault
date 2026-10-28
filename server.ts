@@ -289,7 +289,7 @@ function getInitialDB(): DatabaseStructure {
       },
     ],
     settings: {
-      office_name: 'GM INVENTORY VAULT',
+      office_name: 'CM INVENTORY WALLET',
       currency: 'PKR',
       default_city: 'Lahore',
       popular_societies: [
@@ -494,6 +494,8 @@ app.post('/api/auth/login', (req: Request, res: Response) => {
       cleanPassword === 'admin' || 
       cleanPassword === 'admin123' || 
       cleanPassword === 'admin2026' || 
+      cleanPassword === 'cmwallet2026' || 
+      cleanPassword === 'cmwallet' || 
       cleanPassword === 'cmvault2026' || 
       cleanPassword === 'cmvault' || 
       cleanPassword === '5978' || 
@@ -620,8 +622,8 @@ async function handleRequestAccess(req: Request, res: Response): Promise<void> {
   const ownerEmail = db.settings?.owner_email || 'sacc5038@gmail.com';
   const ownerWhatsApp = db.settings?.owner_whatsapp || db.settings?.owner_phone || '+92 3082665978';
 
-  const emailSubject = `🔔 New User Registered Alert: ${full_name} (${phone || normalized}) - CM INVENTORY VAULT`;
-  const emailBody = `Hello Administration / Owner,\n\nA new user has just created an account on your CM INVENTORY VAULT Real Estate System:\n\n👤 Full Name: ${full_name}\n📱 Phone / WhatsApp: ${phone || 'N/A'}\n✉️ Email: ${email || 'N/A'}\n🏢 Agency / City: ${agency_name || 'Individual'} (${city || 'N/A'})\n🆔 Username: ${normalized}\n⏰ Registration Time: ${new Date().toLocaleString()}\n\n👉 You can view and manage this user in your Owner Executive Console at any time.`;
+  const emailSubject = `🔔 New User Registered Alert: ${full_name} (${phone || normalized}) - CM INVENTORY WALLET`;
+  const emailBody = `Hello Administration / Owner,\n\nA new user has just created an account on your CM INVENTORY WALLET Real Estate System:\n\n👤 Full Name: ${full_name}\n📱 Phone / WhatsApp: ${phone || 'N/A'}\n✉️ Email: ${email || 'N/A'}\n🏢 Agency / City: ${agency_name || 'Individual'} (${city || 'N/A'})\n🆔 Username: ${normalized}\n⏰ Registration Time: ${new Date().toLocaleString()}\n\n👉 You can view and manage this user in your Owner Executive Console at any time.`;
 
   // Automated email dispatch to owner (non-blocking)
   let emailDispatched = false;
@@ -638,7 +640,7 @@ async function handleRequestAccess(req: Request, res: Response): Promise<void> {
       },
       body: JSON.stringify({
         _subject: emailSubject,
-        "Portal": "CM INVENTORY VAULT",
+        "Portal": "CM INVENTORY WALLET",
         "Applicant Name": full_name,
         "Phone / WhatsApp": phone || 'N/A',
         "Email": email || 'N/A',
@@ -677,7 +679,7 @@ async function handleRequestAccess(req: Request, res: Response): Promise<void> {
 
   res.status(201).json({
     success: true,
-    message: 'Account registered successfully! Welcome to CM INVENTORY VAULT.',
+    message: 'Account registered successfully! Welcome to CM INVENTORY WALLET.',
     user: safeUser,
     token,
     expires_at,

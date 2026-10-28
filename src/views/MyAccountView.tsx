@@ -197,7 +197,7 @@ export const MyAccountView: React.FC<MyAccountViewProps> = ({
               <div className="flex items-center gap-2">
                 <Crown className="w-5 h-5 text-amber-600 fill-amber-500" />
                 <span className="text-sm font-bold text-amber-900 dark:text-amber-200 font-brand">
-                  CM Vault Pro — 100% Ad-Free Paid Version
+                  CM Wallet Pro — 100% Ad-Free Paid Version
                 </span>
               </div>
               <span className="text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-600 text-white shadow-xs">
@@ -347,7 +347,7 @@ export const MyAccountView: React.FC<MyAccountViewProps> = ({
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-900 dark:text-amber-300 border border-amber-500/30 text-xs font-bold transition shadow-xs active:scale-95"
           >
             <ShieldCheck className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-            <span>Open Executive Administration Console (Admin Vault)</span>
+            <span>Open Executive Administration Console (Admin Wallet)</span>
           </button>
         </div>
       )}

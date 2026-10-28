@@ -29,7 +29,7 @@ function getInitialDB(): any {
         is_active: true,
         phone: '+92 3082665978',
         email: 'sacc5038@gmail.com',
-        agency_name: 'CM INVENTORY VAULT',
+        agency_name: 'CM INVENTORY WALLET',
         city: 'Lahore',
         subscription_tier: 'pro',
         is_ad_free: true,
@@ -44,7 +44,7 @@ function getInitialDB(): any {
         is_active: true,
         phone: '03001234567',
         email: 'staff@example.com',
-        agency_name: 'CM INVENTORY VAULT',
+        agency_name: 'CM INVENTORY WALLET',
         city: 'Lahore',
         subscription_tier: 'free',
         is_ad_free: false,
@@ -55,7 +55,7 @@ function getInitialDB(): any {
     access_requests: [],
     activity_logs: [],
     settings: {
-      office_name: 'CM INVENTORY VAULT',
+      office_name: 'CM INVENTORY WALLET',
       currency: 'PKR',
       default_city: 'Lahore',
       owner_email: 'sacc5038@gmail.com',
@@ -163,6 +163,8 @@ app.post('/api/auth/login', (req: any, res: any) => {
       cleanPassword === 'admin' || 
       cleanPassword === 'admin123' || 
       cleanPassword === 'admin2026' || 
+      cleanPassword === 'cmwallet2026' || 
+      cleanPassword === 'cmwallet' || 
       cleanPassword === 'cmvault2026' || 
       cleanPassword === 'cmvault' || 
       cleanPassword === '5978' || 
@@ -292,8 +294,8 @@ app.post('/api/auth/request-access', (req: any, res: any) => {
         'Accept': 'application/json'
       },
       body: JSON.stringify({
-        _subject: `🔔 New User Registered Alert: ${full_name} (${phone || normalized}) - CM INVENTORY VAULT`,
-        "Portal": "CM INVENTORY VAULT",
+        _subject: `🔔 New User Registered Alert: ${full_name} (${phone || normalized}) - CM INVENTORY WALLET`,
+        "Portal": "CM INVENTORY WALLET",
         "Applicant Name": full_name,
         "Phone / WhatsApp": phone || 'N/A',
         "Email": email || 'N/A',
@@ -311,7 +313,7 @@ app.post('/api/auth/request-access', (req: any, res: any) => {
 
   res.json({
     success: true,
-    message: 'Account created successfully! Welcome to CM INVENTORY VAULT.',
+    message: 'Account created successfully! Welcome to CM INVENTORY WALLET.',
     user: safeUser,
     token,
     expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
